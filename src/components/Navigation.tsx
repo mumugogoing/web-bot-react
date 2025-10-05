@@ -1,16 +1,20 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, Select, Space, Typography } from 'antd';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, Button, Space, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
+import { UserOutlined, LogoutOutlined, LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types/auth';
-
-const { Text } = Typography;
 
 const Navigation: React.FC = () => {
   const location = useLocation();
-  const { role, setRole } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated, userInfo, logout, role } = useAuth();
   
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   const items: MenuProps['items'] = [
     {
       label: <Link to="/">首页</Link>,
@@ -30,6 +34,16 @@ const Navigation: React.FC = () => {
     },
   ];
 
+  // 用户下拉菜单
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      onClick: handleLogout,
+    },
+  ];
+
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <Menu 
@@ -39,17 +53,23 @@ const Navigation: React.FC = () => {
         style={{ flex: 1, marginBottom: '20px' }}
       />
       <Space style={{ marginRight: '20px', marginBottom: '20px' }}>
-        <Text>用户权限:</Text>
-        <Select
-          value={role}
-          onChange={setRole}
-          style={{ width: 120 }}
-          options={[
-            { label: '访客', value: UserRole.GUEST },
-            { label: '普通用户', value: UserRole.USER },
-            { label: '管理员', value: UserRole.ADMIN },
-          ]}
-        />
+        {isAuthenticated ? (
+          <>
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+              <Button icon={<UserOutlined />}>
+                {userInfo?.nickname || userInfo?.username || '用户'} ({role})
+              </Button>
+            </Dropdown>
+          </>
+        ) : (
+          <Button 
+            type="primary" 
+            icon={<LoginOutlined />}
+            onClick={() => navigate('/login')}
+          >
+            登录
+          </Button>
+        )}
       </Space>
     </div>
   );
