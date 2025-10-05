@@ -1,13 +1,15 @@
-import React from 'react';
 import { RouterProviderComponent } from '@/router';
+import { AuthProvider } from '@/contexts/AuthContext';
 import 'antd/dist/reset.css';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <RouterProviderComponent />
-    </div>
+    <AuthProvider>
+      <div className="App">
+        <RouterProviderComponent />
+      </div>
+    </AuthProvider>
   );
 }
 

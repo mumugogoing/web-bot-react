@@ -1,9 +1,12 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import Home from '@/views/Home';
 import AlexSwap from '@/views/swap/alex';
 import StarknetMonitor from '@/views/StarknetMonitor';
+import StacksMonitor from '@/views/StacksMonitor';
+import { UserRole } from '@/types/auth';
 
 const router = createBrowserRouter([
   {
@@ -16,11 +19,27 @@ const router = createBrowserRouter([
       },
       {
         path: "swap",
-        element: <AlexSwap />,
+        element: (
+          <ProtectedRoute requiredRole={UserRole.USER}>
+            <AlexSwap />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "monitor",
-        element: <StarknetMonitor />,
+        element: (
+          <ProtectedRoute requiredRole={UserRole.GUEST}>
+            <StarknetMonitor />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "stacks",
+        element: (
+          <ProtectedRoute requiredRole={UserRole.GUEST}>
+            <StacksMonitor />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -29,5 +48,3 @@ const router = createBrowserRouter([
 export const RouterProviderComponent: React.FC = () => {
   return <RouterProvider router={router} />;
 };
-
-export default router;
