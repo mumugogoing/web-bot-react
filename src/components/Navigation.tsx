@@ -53,6 +53,14 @@ const Navigation: React.FC = () => {
           key: '/system/roles',
         },
         {
+          label: <Link to="/system/menus">菜单管理</Link>,
+          key: '/system/menus',
+        },
+        {
+          label: <Link to="/system/apis">接口管理</Link>,
+          key: '/system/apis',
+        },
+        {
           label: <Link to="/system/logs">操作日志</Link>,
           key: '/system/logs',
         },
