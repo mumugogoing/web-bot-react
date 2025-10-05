@@ -3,12 +3,17 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Home from '@/views/Home';
+import Login from '@/views/login';
 import AlexSwap from '@/views/swap/alex';
 import StarknetMonitor from '@/views/StarknetMonitor';
 import StacksMonitor from '@/views/StacksMonitor';
 import { UserRole } from '@/types/auth';
 
 const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <Login />,
+  },
   {
     path: "/",
     element: <Layout />,
@@ -28,7 +33,7 @@ const router = createBrowserRouter([
       {
         path: "monitor",
         element: (
-          <ProtectedRoute requiredRole={UserRole.GUEST}>
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <StarknetMonitor />
           </ProtectedRoute>
         ),
@@ -36,7 +41,7 @@ const router = createBrowserRouter([
       {
         path: "stacks",
         element: (
-          <ProtectedRoute requiredRole={UserRole.GUEST}>
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <StacksMonitor />
           </ProtectedRoute>
         ),
