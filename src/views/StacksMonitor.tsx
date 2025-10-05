@@ -12,41 +12,46 @@ import {
   Row,
   Col,
   message,
-  Input
+  Input,
 } from 'antd';
 import {
   ReloadOutlined,
   LinkOutlined,
   SearchOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import {
-  getLatestTransactions,
-  parseTransactionType,
-  parseTransactionStatus,
-  formatAddress,
-  formatTimestamp,
-  type StarknetTransaction
-} from '@/api/starknet';
+  getStacksTransactions,
+  parseStacksTransactionType,
+  parseStacksTransactionStatus,
+  formatStacksAddress,
+  formatStacksTimestamp,
+  parseContractPlatform,
+  formatSTXAmount,
+  type StacksTransaction,
+} from '@/api/stacks';
 
 const { Title, Text, Paragraph } = Typography;
 
-const StarknetMonitor: React.FC = () => {
-  const [transactions, setTransactions] = useState<StarknetTransaction[]>([]);
+const StacksMonitor: React.FC = () => {
+  const [transactions, setTransactions] = useState<StacksTransaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
   const [searchHash, setSearchHash] = useState('');
 
   // 获取交易数据
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getLatestTransactions(currentPage, pageSize);
-      setTransactions(result.items);
+      const offset = (currentPage - 1) * pageSize;
+      const result = await getStacksTransactions(pageSize, offset);
+      setTransactions(result.results);
+      setTotal(result.total);
       setLastUpdateTime(new Date().toLocaleTimeString('zh-CN'));
       message.success('交易数据已更新');
     } catch (error) {
@@ -75,46 +80,19 @@ const StarknetMonitor: React.FC = () => {
     };
   }, [autoRefresh, fetchTransactions]);
 
-  // 解析交易中的平台信息
-  const parsePlatform = (tx: StarknetTransaction): string => {
-    if (tx.calldata && tx.calldata.length > 0) {
-      const platformData = tx.calldata.find((data: string) => data.startsWith('Platform:'));
-      if (platformData) {
-        return platformData.split(':')[1];
-      }
-    }
-    return '未知平台';
-  };
-
-  // 解析代币信息
-  const parseTokenInfo = (tx: StarknetTransaction): { from: string; to: string; amount: string } => {
-    const defaultInfo = { from: '-', to: '-', amount: '-' };
-    if (!tx.calldata || tx.calldata.length === 0) return defaultInfo;
-
-    const fromData = tx.calldata.find((data: string) => data.startsWith('From:'));
-    const toData = tx.calldata.find((data: string) => data.startsWith('To:'));
-    const amountData = tx.calldata.find((data: string) => data.startsWith('Amount:'));
-
-    return {
-      from: fromData ? fromData.split(':')[1] : '-',
-      to: toData ? toData.split(':')[1] : '-',
-      amount: amountData ? amountData.split(':')[1] : '-'
-    };
-  };
-
   // 表格列定义
-  const columns: ColumnsType<StarknetTransaction> = [
+  const columns: ColumnsType<StacksTransaction> = [
     {
       title: '交易哈希',
-      dataIndex: 'hash',
-      key: 'hash',
+      dataIndex: 'tx_id',
+      key: 'tx_id',
       width: 150,
-      render: (hash: string) => (
-        <Tooltip title={hash}>
+      render: (txId: string) => (
+        <Tooltip title={txId}>
           <Space>
-            <Text copyable={{ text: hash }}>{formatAddress(hash)}</Text>
+            <Text copyable={{ text: txId }}>{formatStacksAddress(txId)}</Text>
             <a
-              href={`https://voyager.online/tx/${hash}`}
+              href={`https://explorer.hiro.so/txid/${txId}?chain=mainnet`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -126,49 +104,64 @@ const StarknetMonitor: React.FC = () => {
     },
     {
       title: '类型',
-      dataIndex: 'type',
-      key: 'type',
+      dataIndex: 'tx_type',
+      key: 'tx_type',
       width: 100,
       render: (type: string) => (
-        <Tag color="blue">{parseTransactionType(type)}</Tag>
+        <Tag color="blue">{parseStacksTransactionType(type)}</Tag>
       ),
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      width: 120,
-      render: (status: string) => {
-        const color = status === 'ACCEPTED_ON_L1' ? 'green' : 
-                     status === 'ACCEPTED_ON_L2' ? 'cyan' : 'orange';
-        return <Tag color={color}>{parseTransactionStatus(status)}</Tag>;
-      },
-    },
-    {
-      title: '平台',
-      key: 'platform',
+      dataIndex: 'tx_status',
+      key: 'tx_status',
       width: 100,
-      render: (_: unknown, record: StarknetTransaction) => {
-        const platform = parsePlatform(record);
-        return <Tag color="purple">{platform}</Tag>;
+      render: (status: string) => {
+        const color = status === 'success' ? 'green' : 'orange';
+        return <Tag color={color}>{parseStacksTransactionStatus(status)}</Tag>;
       },
     },
     {
-      title: '代币交换',
-      key: 'tokenSwap',
-      width: 150,
-      render: (_: unknown, record: StarknetTransaction) => {
-        const tokenInfo = parseTokenInfo(record);
-        return (
-          <Space direction="vertical" size="small">
-            <Text>
-              <Tag color="gold">{tokenInfo.from}</Tag> → <Tag color="green">{tokenInfo.to}</Tag>
-            </Text>
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              数量: {tokenInfo.amount}
-            </Text>
-          </Space>
-        );
+      title: '平台/合约',
+      key: 'platform',
+      width: 120,
+      render: (record: StacksTransaction) => {
+        if (record.contract_call) {
+          const platform = parseContractPlatform(record.contract_call.contract_id);
+          return <Tag color="purple">{platform}</Tag>;
+        }
+        return <Tag color="default">-</Tag>;
+      },
+    },
+    {
+      title: '交易详情',
+      key: 'details',
+      width: 200,
+      render: (record: StacksTransaction) => {
+        if (record.token_transfer) {
+          return (
+            <Space direction="vertical" size="small">
+              <Text>
+                <Tag color="gold">STX</Tag> 转账
+              </Text>
+              <Text type="secondary" style={{ fontSize: '12px' }}>
+                数量: {formatSTXAmount(record.token_transfer.amount)} STX
+              </Text>
+            </Space>
+          );
+        } else if (record.contract_call) {
+          return (
+            <Space direction="vertical" size="small">
+              <Text>
+                <Tag color="cyan">{record.contract_call.function_name}</Tag>
+              </Text>
+              <Text type="secondary" style={{ fontSize: '12px' }}>
+                合约调用
+              </Text>
+            </Space>
+          );
+        }
+        return <Text type="secondary">其他交易</Text>;
       },
     },
     {
@@ -176,66 +169,82 @@ const StarknetMonitor: React.FC = () => {
       dataIndex: 'sender_address',
       key: 'sender_address',
       width: 150,
-      render: (address: string) => address ? (
-        <Tooltip title={address}>
-          <Text copyable={{ text: address }}>{formatAddress(address)}</Text>
-        </Tooltip>
-      ) : '-',
+      render: (address: string) =>
+        address ? (
+          <Tooltip title={address}>
+            <Text copyable={{ text: address }}>{formatStacksAddress(address)}</Text>
+          </Tooltip>
+        ) : (
+          '-'
+        ),
     },
     {
-      title: '合约地址',
-      dataIndex: 'contract_address',
-      key: 'contract_address',
+      title: '接收地址',
+      key: 'recipient_address',
       width: 150,
-      render: (address: string) => address ? (
-        <Tooltip title={address}>
-          <Text copyable={{ text: address }}>{formatAddress(address)}</Text>
-        </Tooltip>
-      ) : '-',
+      render: (record: StacksTransaction) => {
+        const address = record.token_transfer?.recipient_address || 
+                       record.contract_call?.contract_id || '-';
+        if (address === '-') return <Text>-</Text>;
+        return (
+          <Tooltip title={address}>
+            <Text copyable={{ text: address }}>{formatStacksAddress(address)}</Text>
+          </Tooltip>
+        );
+      },
     },
     {
       title: '区块高度',
-      dataIndex: 'block_number',
-      key: 'block_number',
+      dataIndex: 'block_height',
+      key: 'block_height',
       width: 100,
-      render: (blockNumber: number) => blockNumber?.toLocaleString() || '-',
+      render: (height: number) => height?.toLocaleString() || '-',
     },
     {
-      title: '手续费 (ETH)',
-      dataIndex: 'actual_fee',
-      key: 'actual_fee',
+      title: '手续费 (STX)',
+      dataIndex: 'fee_rate',
+      key: 'fee_rate',
       width: 120,
       render: (fee: string) => (
-        <Text>{fee || '-'}</Text>
+        <Text>{formatSTXAmount(fee)}</Text>
       ),
     },
     {
       title: '时间',
-      dataIndex: 'timestamp',
-      key: 'timestamp',
+      dataIndex: 'burn_block_time',
+      key: 'burn_block_time',
       width: 180,
       render: (timestamp: number) => (
-        <Tooltip title={formatTimestamp(timestamp)}>
+        <Tooltip title={formatStacksTimestamp(timestamp)}>
           <Space>
             <ClockCircleOutlined />
-            <Text>{formatTimestamp(timestamp)}</Text>
+            <Text>{formatStacksTimestamp(timestamp)}</Text>
           </Space>
         </Tooltip>
       ),
     },
   ];
 
+  // 过滤交易
+  const filteredTransactions = transactions.filter(
+    (tx) =>
+      !searchHash || tx.tx_id.toLowerCase().includes(searchHash.toLowerCase())
+  );
+
   return (
     <div style={{ padding: '20px' }}>
       {/* 页面标题和说明 */}
       <Card style={{ marginBottom: '20px' }}>
-        <Title level={2}>Starknet 交易监控</Title>
+        <Title level={2}>Stacks 区块链交易监控</Title>
         <Paragraph>
-          实时监控 Starknet 网络上的所有交易，包括 DEX 交易、代币转账、合约调用等。
-          本页面使用免费的公共 API，无需登录即可查看。
+          实时监控 Stacks 区块链网络上的所有交易，包括 STX 转账、DeFi 合约调用等。
+          本页面使用免费的 Hiro API，无需登录即可查看。
         </Paragraph>
         <Paragraph type="secondary">
-          <Text strong>数据来源：</Text>Voyager (Starknet 区块浏览器公共 API)
+          <Text strong>数据来源：</Text>Hiro API (Stacks 区块链公共 API - 完全免费)
+        </Paragraph>
+        <Paragraph type="secondary">
+          <Text strong>主要 DeFi 平台：</Text>ALEX、Arkadiko、Stackswap 等
         </Paragraph>
       </Card>
 
@@ -244,8 +253,8 @@ const StarknetMonitor: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="显示交易数"
-              value={transactions.length}
+              title="当前页交易数"
+              value={filteredTransactions.length}
               suffix="笔"
             />
           </Card>
@@ -253,9 +262,9 @@ const StarknetMonitor: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="当前页"
-              value={currentPage}
-              suffix={`/ ${pageSize}条/页`}
+              title="总交易数"
+              value={total}
+              suffix="笔"
             />
           </Card>
         </Col>
@@ -304,7 +313,6 @@ const StarknetMonitor: React.FC = () => {
           <Button
             onClick={() => {
               setSearchHash('');
-              setCurrentPage(1);
             }}
           >
             清除筛选
@@ -316,10 +324,8 @@ const StarknetMonitor: React.FC = () => {
       <Card>
         <Table
           columns={columns}
-          dataSource={transactions.filter(tx => 
-            !searchHash || tx.hash.toLowerCase().includes(searchHash.toLowerCase())
-          )}
-          rowKey="hash"
+          dataSource={filteredTransactions}
+          rowKey="tx_id"
           loading={loading}
           rowClassName={(_, index) => {
             // 最新一条交易（第一条）使用不同背景色
@@ -328,7 +334,7 @@ const StarknetMonitor: React.FC = () => {
           pagination={{
             current: currentPage,
             pageSize: pageSize,
-            total: 2000, // 总数可以根据实际情况调整
+            total: total,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条记录`,
@@ -348,14 +354,30 @@ const StarknetMonitor: React.FC = () => {
         <Title level={4}>使用说明</Title>
         <Paragraph>
           <ul>
-            <li><Text strong>交易哈希：</Text>点击复制图标可复制完整地址，点击链接图标可在 Voyager 浏览器中查看详情</li>
-            <li><Text strong>类型：</Text>显示交易类型（调用、部署、声明等）</li>
-            <li><Text strong>状态：</Text>显示交易确认状态（L1已确认、L2已确认、待处理等）</li>
-            <li><Text strong>平台：</Text>显示执行交易的 DEX 平台（如 Jediswap、MySwap 等）</li>
-            <li><Text strong>代币交换：</Text>显示交易涉及的代币对和数量</li>
-            <li><Text strong>地址：</Text>显示发送地址和合约地址，可点击复制</li>
-            <li><Text strong>最新交易：</Text>列表中第一条交易会高亮显示（黄色背景）</li>
-            <li><Text strong>自动刷新：</Text>开启后每30秒自动更新交易数据</li>
+            <li>
+              <Text strong>交易哈希：</Text>点击复制图标可复制完整地址，点击链接图标可在 Hiro 浏览器中查看详情
+            </li>
+            <li>
+              <Text strong>类型：</Text>显示交易类型（代币转账、合约调用等）
+            </li>
+            <li>
+              <Text strong>状态：</Text>显示交易确认状态（成功、待处理等）
+            </li>
+            <li>
+              <Text strong>平台：</Text>显示执行交易的 DeFi 平台或合约名称
+            </li>
+            <li>
+              <Text strong>交易详情：</Text>显示交易涉及的代币和数量或合约函数
+            </li>
+            <li>
+              <Text strong>地址：</Text>显示发送地址和接收地址，可点击复制
+            </li>
+            <li>
+              <Text strong>最新交易：</Text>列表中第一条交易会高亮显示（黄色背景）
+            </li>
+            <li>
+              <Text strong>自动刷新：</Text>开启后每30秒自动更新交易数据
+            </li>
           </ul>
         </Paragraph>
       </Card>
@@ -375,4 +397,4 @@ const StarknetMonitor: React.FC = () => {
   );
 };
 
-export default StarknetMonitor;
+export default StacksMonitor;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Typography, Button } from 'antd';
+import { Card, Typography, Button, Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
@@ -17,21 +17,29 @@ const Home: React.FC = () => {
         <Paragraph>
           您可以在这里查看资产余额、执行交易操作、管理您的投资组合等。
         </Paragraph>
-        <Button 
-          type="primary" 
-          size="large" 
-          onClick={() => navigate('/swap')}
-          style={{ marginRight: '10px' }}
-        >
-          开始交易
-        </Button>
-        <Button 
-          type="default" 
-          size="large" 
-          onClick={() => navigate('/monitor')}
-        >
-          Starknet 监控
-        </Button>
+        <Space wrap>
+          <Button 
+            type="primary" 
+            size="large" 
+            onClick={() => navigate('/swap')}
+          >
+            开始交易
+          </Button>
+          <Button 
+            type="default" 
+            size="large" 
+            onClick={() => navigate('/monitor')}
+          >
+            Starknet 监控
+          </Button>
+          <Button 
+            type="default" 
+            size="large" 
+            onClick={() => navigate('/stacks')}
+          >
+            Stacks 监控
+          </Button>
+        </Space>
       </Card>
     </div>
   );
