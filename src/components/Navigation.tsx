@@ -2,8 +2,15 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, Button, Space, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
-import { UserOutlined, LogoutOutlined, LoginOutlined } from '@ant-design/icons';
+import { 
+  UserOutlined, 
+  LogoutOutlined, 
+  LoginOutlined, 
+  BellOutlined,
+  ProfileOutlined
+} from '@ant-design/icons';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types/auth';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -32,10 +39,44 @@ const Navigation: React.FC = () => {
       label: <Link to="/stacks">Stacks监控</Link>,
       key: '/stacks',
     },
+    // System Management - Only visible to admins
+    ...(role === UserRole.ADMIN ? [{
+      label: '系统管理',
+      key: 'system',
+      children: [
+        {
+          label: <Link to="/system/users">用户管理</Link>,
+          key: '/system/users',
+        },
+        {
+          label: <Link to="/system/roles">角色管理</Link>,
+          key: '/system/roles',
+        },
+        {
+          label: <Link to="/system/logs">操作日志</Link>,
+          key: '/system/logs',
+        },
+      ],
+    }] : []),
   ];
 
   // 用户下拉菜单
   const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      icon: <ProfileOutlined />,
+      label: '个人中心',
+      onClick: () => navigate('/profile'),
+    },
+    {
+      key: 'messages',
+      icon: <BellOutlined />,
+      label: '消息中心',
+      onClick: () => navigate('/system/messages'),
+    },
+    {
+      type: 'divider',
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
