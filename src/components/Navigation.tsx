@@ -15,6 +15,10 @@ const Navigation: React.FC = () => {
       label: <Link to="/swap">交易</Link>,
       key: '/swap',
     },
+    {
+      label: <Link to="/monitor">Starknet监控</Link>,
+      key: '/monitor',
+    },
   ];
 
   return (

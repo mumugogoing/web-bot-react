@@ -21,8 +21,16 @@ const Home: React.FC = () => {
           type="primary" 
           size="large" 
           onClick={() => navigate('/swap')}
+          style={{ marginRight: '10px' }}
         >
           开始交易
+        </Button>
+        <Button 
+          type="default" 
+          size="large" 
+          onClick={() => navigate('/monitor')}
+        >
+          Starknet 监控
         </Button>
       </Card>
     </div>
