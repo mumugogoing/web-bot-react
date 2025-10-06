@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { getToken, removeToken } from './cookies';
+import { getToken, removeToken, getIdempotenceToken } from './cookies';
+import { signToken } from './signToken';
 
 // 创建 axios 实例
 const service = axios.create({
@@ -18,9 +19,27 @@ service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 在请求头中添加认证信息等
     const token = getToken();
-    if (token) {
+    // 登录和刷新token请求不需要认证头
+    const noAuthUrls = ['/base/login', '/base/refreshToken'];
+    if (token && !noAuthUrls.includes(config.url || '')) {
       config.headers.Authorization = 'Bearer ' + token;
     }
+    
+    // 添加幂等性token（排除登录和刷新token请求）
+    const idempotenceToken = getIdempotenceToken();
+    if (idempotenceToken && !noAuthUrls.includes(config.url || '')) {
+      config.headers['api-idempotence-token'] = idempotenceToken;
+    }
+    
+    // 添加签名令牌
+    config.headers['X-Sign-Token'] = signToken({
+      base: config.baseURL,
+      url: config.url,
+      method: config.method,
+      params: config.params,
+      data: config.data
+    });
+    
     return config;
   },
   (error) => {

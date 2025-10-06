@@ -49,3 +49,10 @@ export const getUserInfo = () =>
     method: 'post',
     data: {}
   });
+
+// 获取幂等性token
+export const getIdempotenceToken = () =>
+  request({
+    url: '/base/idempotenceToken',
+    method: 'get'
+  });

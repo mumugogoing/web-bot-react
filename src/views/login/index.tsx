@@ -73,6 +73,9 @@ const Login: React.FC = () => {
         values.captchaAnswer
       );
       
+      // 添加一个小延迟确保状态更新
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const from = (location.state as any)?.from?.pathname || '/';
       navigate(from, { replace: true });
     } catch (error: any) {

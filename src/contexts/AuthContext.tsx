@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole, type UserInfo } from '@/types/auth';
 import { getToken, setToken as saveToken, removeToken } from '@/utils/cookies';
-import { login as loginApi, logout as logoutApi, getUserInfo as getUserInfoApi } from '@/api/auth';
+import { login as loginApi, logout as logoutApi, getUserInfo as getUserInfoApi, getIdempotenceToken } from '@/api/auth';
 import { message } from 'antd';
+import { encryptPassword } from '@/utils/encrypt';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -12,6 +13,7 @@ interface AuthContextType {
   login: (username: string, password: string, captchaId?: string, captchaAnswer?: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUserInfo: () => Promise<void>;
+  refreshIdempotenceToken: () => Promise<void>;
   setRole: (role: UserRole) => void;
   canAccess: (requiredRole: UserRole) => boolean;
 }
@@ -23,6 +25,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [role, setRoleState] = useState<UserRole>(UserRole.GUEST);
+  const [idempotenceToken, setIdempotenceToken] = useState<string | null>(null);
+
+  // 获取幂等性token
+  const refreshIdempotenceToken = async () => {
+    try {
+      const response = await getIdempotenceToken();
+      if (response.data) {
+        setIdempotenceToken(response.data);
+        localStorage.setItem('api-idempotence-token', response.data);
+      }
+    } catch (error) {
+      console.error('Failed to refresh idempotence token:', error);
+    }
+  };
 
   // 从后端角色映射到前端角色
   const mapBackendRoleToFrontend = (backendRoles: string[]): UserRole => {
@@ -49,9 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await fetchUserInfo();
         } catch (error) {
           console.error('Failed to fetch user info:', error);
-          removeToken();
-          setIsAuthenticated(false);
-          setUserInfo(null);
+          // 即使获取用户信息失败，也保持认证状态
+          setIsAuthenticated(true);
           setRoleState(UserRole.GUEST);
         }
       }
@@ -64,19 +79,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // 登录
   const login = async (username: string, password: string, captchaId?: string, captchaAnswer?: string) => {
     try {
+      // 对密码进行RSA加密
+      const encryptedPassword = encryptPassword(password);
+      
       const response = await loginApi({
         username,
-        password,
+        password: encryptedPassword,
         captchaId,
         captchaAnswer
       });
       
       if (response.data && response.data.token) {
         saveToken(response.data.token);
-        setIsAuthenticated(true);
         
         // 登录成功后获取用户信息
         await fetchUserInfo();
+        
+        // 刷新幂等性token
+        await refreshIdempotenceToken();
+        
         message.success('登录成功');
       }
     } catch (error: any) {
@@ -112,8 +133,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // 从后端角色映射到前端角色
         const frontendRole = mapBackendRoleToFrontend(userData.roles);
         setRoleState(frontendRole);
+      } else {
+        // 如果没有用户数据，设置为已认证但没有用户信息
+        setIsAuthenticated(true);
       }
     } catch (error) {
+      // 即使获取用户信息失败，也设置为已认证
+      setIsAuthenticated(true);
       throw error;
     }
   };
@@ -148,6 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       logout,
       fetchUserInfo,
+      refreshIdempotenceToken,
       setRole, 
       canAccess 
     }}>
