@@ -1,42 +1,71 @@
+/* Reset default styles for full-screen layout */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.App {
+  width: 100%;
+  min-height: 100vh;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Ant Design customization */
+.ant-layout {
+  background: #f0f2f5;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.ant-layout-header {
+  height: 64px;
+  line-height: 64px;
+  padding: 0;
 }
 
-.card {
-  padding: 2em;
+.ant-layout-content {
+  background: #fff;
 }
 
-.read-the-docs {
-  color: #888;
+/* Card styles */
+.ant-card {
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
+
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Table styles */
+.ant-table {
+  font-size: 14px;
+}
+
+.ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* Button styles */
+.ant-btn-primary {
+  background-color: #1890ff;
+}
+
+.ant-btn-primary:hover {
+  background-color: #40a9ff;
+}
+
+/* Form styles */
+.ant-form-item {
+  margin-bottom: 16px;
+}
+
+/* Menu styles for better visual */
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: #1890ff !important;
+}
+
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #fff;
+}
+
