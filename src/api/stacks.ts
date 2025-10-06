@@ -239,18 +239,26 @@ export const parseTokenSymbol = (tokenId: string): string => {
  * 尝试从合约调用参数中提取交易对和金额信息
  */
 export const parseSwapInfo = (tx: StacksTransaction): string => {
+  // 处理代币转账
+  if (tx.token_transfer && tx.token_transfer.amount) {
+    const amount = formatAmount(tx.token_transfer.amount);
+    return `${amount} STX (转账)`;
+  }
+  
   if (!tx.contract_call || !tx.contract_call.function_args) {
     return '';
   }
   
   const functionName = tx.contract_call.function_name || '';
   const args = tx.contract_call.function_args;
+  const contractId = tx.contract_call.contract_id || '';
   
   // 检查是否为swap相关函数
   const isSwapFunction = 
     functionName.includes('swap') || 
     functionName.includes('exchange') ||
-    functionName.includes('trade');
+    functionName.includes('trade') ||
+    functionName.includes('route');
   
   if (!isSwapFunction) {
     return '';
@@ -262,6 +270,15 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
     let toToken = '';
     let fromAmount = '';
     let toAmount = '';
+    
+    // 从合约ID推断可能的代币
+    if (contractId.includes('alex')) {
+      fromToken = fromToken || 'ALEX';
+    } else if (contractId.includes('velar')) {
+      fromToken = fromToken || 'VELAR';
+    } else if (contractId.includes('bitflow')) {
+      fromToken = fromToken || 'BFT';
+    }
     
     // 解析函数参数
     args.forEach((arg: any, index: number) => {
@@ -307,6 +324,12 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
       }
     });
     
+    // 如果没有找到代币，使用通用标识
+    if (!fromToken && !toToken && (fromAmount || toAmount)) {
+      fromToken = 'Token A';
+      toToken = 'Token B';
+    }
+    
     // 构建swap信息字符串
     if (fromToken && toToken) {
       if (fromAmount && toAmount) {
@@ -318,6 +341,13 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
       } else {
         return `${fromToken} ==> ${toToken}`;
       }
+    } else if (fromToken && fromAmount) {
+      return `${fromAmount} ${fromToken} (swap)`;
+    }
+    
+    // 如果无法提取详细信息，至少标记为swap
+    if (isSwapFunction) {
+      return `Swap (${functionName})`;
     }
     
     return '';
