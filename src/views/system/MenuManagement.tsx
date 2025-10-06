@@ -55,7 +55,15 @@ const MenuManagement: React.FC = () => {
 
   const handleEdit = (record: Menu) => {
     setEditingMenu(record);
-    form.setFieldsValue(record);
+    // Convert numeric values to boolean for Switch components
+    form.setFieldsValue({
+      ...record,
+      status: record.status === 1,
+      hidden: record.hidden === 1,
+      noCache: record.noCache === 1,
+      alwaysShow: record.alwaysShow === 1,
+      breadcrumb: record.breadcrumb === 1,
+    });
     setModalVisible(true);
   };
 
@@ -87,11 +95,22 @@ const MenuManagement: React.FC = () => {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
+      
+      // Transform Switch values to numbers
+      const transformedValues = {
+        ...values,
+        status: values.status ? 1 : 2,
+        hidden: values.hidden ? 1 : 0,
+        noCache: values.noCache ? 1 : 0,
+        alwaysShow: values.alwaysShow ? 1 : 0,
+        breadcrumb: values.breadcrumb ? 1 : 0,
+      };
+      
       if (editingMenu) {
-        await updateMenu(editingMenu.id, values);
+        await updateMenu(editingMenu.id, transformedValues);
         message.success('更新成功');
       } else {
-        await createMenu(values);
+        await createMenu(transformedValues);
         message.success('创建成功');
       }
       setModalVisible(false);
@@ -379,7 +398,7 @@ const MenuManagement: React.FC = () => {
           <Form.Item
             label="状态"
             name="status"
-            initialValue={1}
+            initialValue={true}
             valuePropName="checked"
           >
             <Switch checkedChildren="启用" unCheckedChildren="禁用" />
@@ -387,7 +406,7 @@ const MenuManagement: React.FC = () => {
           <Form.Item
             label="隐藏"
             name="hidden"
-            initialValue={0}
+            initialValue={false}
             valuePropName="checked"
           >
             <Switch checkedChildren="是" unCheckedChildren="否" />
@@ -395,7 +414,7 @@ const MenuManagement: React.FC = () => {
           <Form.Item
             label="不缓存"
             name="noCache"
-            initialValue={0}
+            initialValue={false}
             valuePropName="checked"
           >
             <Switch checkedChildren="是" unCheckedChildren="否" />

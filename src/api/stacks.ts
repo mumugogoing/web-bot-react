@@ -143,11 +143,29 @@ export const parseContractPlatform = (contractId: string): string => {
   
   // 常见的 Stacks DeFi 平台合约
   const platformMap: Record<string, string> = {
-    'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko': 'Arkadiko',
+    // ALEX
     'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.alex': 'ALEX',
+    // Arkadiko
+    'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko': 'Arkadiko',
+    // Stackswap
     'SP1Z92MPDQEWZXW36VX71Q25HKF5K2EPCJ304F275.stackswap': 'Stackswap',
+    // Bitflow
+    'SP3MBWGMCVC9KZ5DTAYFMG1D0AEJCR7NENTM3FTK5.bitflow': 'Bitflow',
+    'SP2XD7417HGPRTREMKF748VNEQPDRR0RMANB7X1NK.bitflow-router': 'Bitflow',
+    // Velar
+    'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.velar': 'Velar',
+    'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core': 'Velar',
+    'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router': 'Velar',
+    // Zest Protocol
+    'SP2VCQJGH7PHP2DJK7Z0V48AGBHQAW3R3ZW1QF4N.zest': 'Zest Protocol',
+    'SP2VCQJGH7PHP2DJK7Z0V48AGBHQAW3R3ZW1QF4N.pool-v1-0': 'Zest Protocol',
+    // STX包装和代币
     'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.wrapped-stx': 'STX包装',
     'SP3DX3H4FEYZJZ586MFBS25ZW3HZDMEW92260R2PR.Wrapped-Bitcoin': 'xBTC',
+    // LNSwap
+    'SP3MBWGMCVC9KZ5DTAYFMG1D0AEJCR7NENTM3FTK5.lnswap': 'LNSwap',
+    // CatamaranSwap
+    'SP2C1WREHGM75C7TGFAEJPFKTFTEGZKF6DFT6E2GE.catamaran-swap': 'CatamaranSwap',
   };
   
   for (const [key, value] of Object.entries(platformMap)) {
@@ -171,4 +189,161 @@ export const parseContractPlatform = (contractId: string): string => {
 export const formatSTXAmount = (amount: string | number): string => {
   const amountNum = typeof amount === 'string' ? parseInt(amount, 10) : amount;
   return (amountNum / 1000000).toFixed(6);
+};
+
+/**
+ * 解析代币符号
+ */
+export const parseTokenSymbol = (tokenId: string): string => {
+  if (!tokenId) return '';
+  
+  const tokenMap: Record<string, string> = {
+    'stx': 'STX',
+    'wrapped-stx': 'wSTX',
+    'xbtc': 'xBTC',
+    'aeusdc': 'aeUSDC',
+    'susdt': 'sUSDT',
+    'welsh': 'WELSH',
+    'ststx': 'stSTX',
+    'velar': 'VELAR',
+    'bitflow': 'BFT',
+    'alex': 'ALEX',
+    'diko': 'DIKO',
+    'auto-alex': 'atALEX',
+  };
+  
+  const lower = tokenId.toLowerCase();
+  for (const [key, value] of Object.entries(tokenMap)) {
+    if (lower.includes(key)) {
+      return value;
+    }
+  }
+  
+  // 尝试从合约ID中提取代币名称
+  const parts = tokenId.split('.');
+  if (parts.length > 1) {
+    const contractName = parts[1];
+    // 提取代币名称，通常在最后
+    const tokenParts = contractName.split('::');
+    if (tokenParts.length > 1) {
+      return tokenParts[tokenParts.length - 1].toUpperCase();
+    }
+    return contractName.slice(0, 10).toUpperCase();
+  }
+  
+  return tokenId.slice(0, 10).toUpperCase();
+};
+
+/**
+ * 解析交易的swap信息
+ * 尝试从合约调用参数中提取交易对和金额信息
+ */
+export const parseSwapInfo = (tx: StacksTransaction): string => {
+  if (!tx.contract_call || !tx.contract_call.function_args) {
+    return '';
+  }
+  
+  const functionName = tx.contract_call.function_name || '';
+  const args = tx.contract_call.function_args;
+  
+  // 检查是否为swap相关函数
+  const isSwapFunction = 
+    functionName.includes('swap') || 
+    functionName.includes('exchange') ||
+    functionName.includes('trade');
+  
+  if (!isSwapFunction) {
+    return '';
+  }
+  
+  try {
+    // 尝试解析参数
+    let fromToken = '';
+    let toToken = '';
+    let fromAmount = '';
+    let toAmount = '';
+    
+    // 解析函数参数
+    args.forEach((arg: any, index: number) => {
+      if (typeof arg === 'object' && arg !== null) {
+        const argStr = JSON.stringify(arg);
+        
+        // 尝试提取代币信息
+        if (argStr.includes('token') || argStr.includes('asset')) {
+          const tokenMatch = argStr.match(/([a-zA-Z0-9-]+)/g);
+          if (tokenMatch && tokenMatch.length > 0) {
+            if (!fromToken) {
+              fromToken = parseTokenSymbol(tokenMatch.join(''));
+            } else if (!toToken) {
+              toToken = parseTokenSymbol(tokenMatch.join(''));
+            }
+          }
+        }
+        
+        // 尝试提取金额信息
+        if (arg.uint || arg.int) {
+          const amount = arg.uint || arg.int;
+          if (!fromAmount) {
+            fromAmount = formatAmount(amount);
+          } else if (!toAmount) {
+            toAmount = formatAmount(amount);
+          }
+        }
+      } else if (typeof arg === 'string') {
+        // 字符串参数可能包含代币信息
+        const symbol = parseTokenSymbol(arg);
+        if (symbol && !fromToken) {
+          fromToken = symbol;
+        } else if (symbol && !toToken) {
+          toToken = symbol;
+        }
+      } else if (typeof arg === 'number') {
+        // 数字参数可能是金额
+        if (!fromAmount) {
+          fromAmount = formatAmount(arg.toString());
+        } else if (!toAmount) {
+          toAmount = formatAmount(arg.toString());
+        }
+      }
+    });
+    
+    // 构建swap信息字符串
+    if (fromToken && toToken) {
+      if (fromAmount && toAmount) {
+        return `${fromAmount} ${fromToken} ==> ${toAmount} ${toToken}`;
+      } else if (fromAmount) {
+        return `${fromAmount} ${fromToken} ==> ${toToken}`;
+      } else if (toAmount) {
+        return `${fromToken} ==> ${toAmount} ${toToken}`;
+      } else {
+        return `${fromToken} ==> ${toToken}`;
+      }
+    }
+    
+    return '';
+  } catch (error) {
+    console.error('解析swap信息失败:', error);
+    return '';
+  }
+};
+
+/**
+ * 格式化金额（智能处理不同精度）
+ */
+const formatAmount = (amount: string): string => {
+  const num = parseFloat(amount);
+  if (isNaN(num)) return amount;
+  
+  // 如果金额很大，可能是微单位，需要转换
+  if (num > 1000000) {
+    const converted = num / 1000000;
+    return converted.toFixed(2);
+  }
+  
+  // 如果金额较小，保留更多小数位
+  if (num < 1) {
+    return num.toFixed(6);
+  }
+  
+  return num.toFixed(2);
 };
