@@ -6,7 +6,9 @@ import Dashboard from '@/views/Dashboard';
 import Login from '@/views/login';
 import AlexSwap from '@/views/swap/alex';
 import StarknetMonitor from '@/views/StarknetMonitor';
-import StacksMonitor from '@/views/StacksMonitor';
+import StacksMonitor from '@/views/stacks';
+import StacksAlex from '@/views/stacks/Alex';
+import StacksDex from '@/views/stacks/Dex';
 import Profile from '@/views/profile';
 import UserManagement from '@/views/system/UserManagement';
 import RoleManagement from '@/views/system/RoleManagement';
@@ -50,6 +52,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <StacksMonitor />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "stacks/alex",
+        element: (
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <StacksAlex />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "stacks/dex",
+        element: (
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <StacksDex />
           </ProtectedRoute>
         ),
       },

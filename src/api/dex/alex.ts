@@ -35,14 +35,14 @@ export const xykAutoBuy = (data: any) =>
     data
   });
 
-export const xykfetachdx = (data: any) =>
+export const xykfetchdx = (data: any) =>
   request({
     url: '/dex/xykfetchdx',
     method: 'post',
     data
   });
 
-export const xykfetachdy = (data: any) =>
+export const xykfetchdy = (data: any) =>
   request({
     url: '/dex/xykfetchdy',
     method: 'post',

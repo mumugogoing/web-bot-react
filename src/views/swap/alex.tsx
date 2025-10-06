@@ -16,8 +16,8 @@ import {
   calcsumdc,
   xykAutoSell,
   xykAutoBuy,
-  xykfetachdy,
-  xykfetachdx,
+  xykfetchdy,
+  xykfetchdx,
   createCexOrder,
   checkTxStatusApi
 } from '@/api/dex/alex';
@@ -191,7 +191,7 @@ const AlexSwap: React.FC = () => {
     try {
       setRow(prev => ({ ...prev, txStatus: '', txId: '' }));
       
-      const response: any = await xykfetachdy({
+      const response: any = await xykfetchdy({
         amount: String(row.amount),
         dx: row.dx,
         dy: row.dy,
@@ -225,7 +225,7 @@ const AlexSwap: React.FC = () => {
     try {
       setRow(prev => ({ ...prev, txStatus: '', txId: '' }));
       
-      const response: any = await xykfetachdx({
+      const response: any = await xykfetchdx({
         amount: String(row.amount),
         dx: row.dx,
         dy: row.dy,
