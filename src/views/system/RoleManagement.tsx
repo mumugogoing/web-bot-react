@@ -36,12 +36,16 @@ const RoleManagement: React.FC = () => {
         pageNum, 
         pageSize 
       });
+      console.log('RoleManagement response:', response);
       if (response.data.code === 201) {
         setRoles(response.data.data.list || []);
         setTotal(response.data.data.total || 0);
+      } else {
+        message.error(`获取角色列表失败: ${response.data.msg || '未知错误'}`);
       }
-    } catch (error) {
-      message.error('获取角色列表失败');
+    } catch (error: any) {
+      console.error('获取角色列表失败:', error);
+      message.error(`获取角色列表失败: ${error.message || '网络错误'}`);
     } finally {
       setLoading(false);
     }
@@ -96,8 +100,9 @@ const RoleManagement: React.FC = () => {
       }
       setModalVisible(false);
       fetchRoles();
-    } catch (error) {
-      message.error('操作失败');
+    } catch (error: any) {
+      console.error('操作失败:', error);
+      message.error(`操作失败: ${error.message || '未知错误'}`);
     }
   };
 

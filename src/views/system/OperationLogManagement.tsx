@@ -34,12 +34,16 @@ const OperationLogManagement: React.FC = () => {
         pageNum, 
         pageSize 
       });
+      console.log('OperationLogManagement response:', response);
       if (response.data.code === 201) {
         setLogs(response.data.data.list || []);
         setTotal(response.data.data.total || 0);
+      } else {
+        message.error(`获取操作日志失败: ${response.data.msg || '未知错误'}`);
       }
-    } catch (error) {
-      message.error('获取操作日志失败');
+    } catch (error: any) {
+      console.error('获取操作日志失败:', error);
+      message.error(`获取操作日志失败: ${error.message || '网络错误'}`);
     } finally {
       setLoading(false);
     }
