@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Table,
@@ -7,21 +7,13 @@ import {
   Space,
   Switch,
   Typography,
-  Statistic,
-  Row,
-  Col,
   message,
   Input,
   Select,
-  Divider
 } from 'antd';
 import {
   ReloadOutlined,
-  LinkOutlined,
-  SearchOutlined,
-  ClockCircleOutlined,
 } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
 import { 
   calcsumdc, 
   getAbtBtcDiff, 
@@ -30,7 +22,7 @@ import {
   xykAutoBuy as xykAutoBuyApi
 } from '@/api/dex/alex';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 interface LogItem {
@@ -72,9 +64,6 @@ interface XykForm {
 
 const StacksAlex: React.FC = () => {
   // 数据状态
-  const [balanceData, setBalanceData] = useState<any>(null);
-  const [abtcData, setAbtcData] = useState<any>(null);
-  const [dtdhData, setDtdhData] = useState<any>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [autoRefresh2, setAutoRefresh2] = useState(false);
   const [autoRefresh3, setAutoRefresh3] = useState(false);
@@ -111,8 +100,6 @@ const StacksAlex: React.FC = () => {
 
   // 日志相关
   const [logs, setLogs] = useState<LogItem[]>([]);
-  const [logConnectionCount, setLogConnectionCount] = useState(0);
-  const [logHeartbeatCount, setLogHeartbeatCount] = useState(0);
   const [logPageSize, setLogPageSize] = useState(10);
 
   // 格式化数值
@@ -132,7 +119,6 @@ const StacksAlex: React.FC = () => {
     const startTime = Date.now();
     try {
       const res: any = await calcsumdc({});
-      setBalanceData(res.data || res);
       const sumData = {
         sumStx: res.data ? formatValue('sumStx', res.data.sumStx) : '加载中...',
         sumUsd: res.data ? formatValue('sumUsd', res.data.sumUsd) : '加载中...',
@@ -162,13 +148,10 @@ const StacksAlex: React.FC = () => {
       const endTime = Date.now();
       setSumDataFetchTime(`总额数据刷新失败: ${endTime - startTime}ms`);
       if (error.msg) {
-        setBalanceData({ 错误: error.msg });
         setFetchError(error.msg);
       } else if (error.response?.data?.msg) {
-        setBalanceData({ 错误: error.response.data.msg });
         setFetchError(error.response.data.msg);
       } else {
-        setBalanceData({ 错误: '数据加载失败' });
         setFetchError('数据加载失败');
       }
     } finally {
@@ -183,7 +166,6 @@ const StacksAlex: React.FC = () => {
     const startTime = Date.now();
     try {
       const res: any = await getAbtBtcDiff({});
-      setAbtcData(res.data || res);
       const abtcData = {
         Abtc: res.data ? formatValue('Abtc', res.data.Abtc) : '加载中...',
         Bbtc: res.data ? formatValue('Bbtc', res.data.Bbtc) : '加载中...',
@@ -198,13 +180,10 @@ const StacksAlex: React.FC = () => {
       const endTime = Date.now();
       setAbtcDataFetchTime(`ABTC数据刷新失败: ${endTime - startTime}ms`);
       if (error.msg) {
-        setAbtcData({ Msg: error.msg });
         setFetchError(error.msg);
       } else if (error.response?.data?.msg) {
-        setAbtcData({ Msg: error.response.data.msg });
         setFetchError(error.response.data.msg);
       } else {
-        setAbtcData({ Msg: '数据加载失败' });
         setFetchError('数据加载失败');
       }
     } finally {
@@ -219,7 +198,6 @@ const StacksAlex: React.FC = () => {
     const startTime = Date.now();
     try {
       const res: any = await getDtdhdiff({});
-      setDtdhData(res.data || res);
       const dtdhData = {
         Dtdh: res.data ? formatValue('Dtdh', res.data.Susdt) : '加载中...',
         Hdtd: res.data ? formatValue('Hdtd', res.data.Usdh) : '加载中...',
@@ -234,13 +212,10 @@ const StacksAlex: React.FC = () => {
       const endTime = Date.now();
       setDtdhDataFetchTime(`DTDH数据刷新失败: ${endTime - startTime}ms`);
       if (error.msg) {
-        setDtdhData({ Msg: error.msg });
         setFetchError(error.msg);
       } else if (error.response?.data?.msg) {
-        setDtdhData({ Msg: error.response.data.msg });
         setFetchError(error.response.data.msg);
       } else {
-        setDtdhData({ Msg: '数据加载失败' });
         setFetchError('数据加载失败');
       }
     } finally {
@@ -368,8 +343,6 @@ const StacksAlex: React.FC = () => {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
         <small>日志推送地址：http://192.168.31.100:11000/logs</small>
-        <span style={{ marginLeft: 20 }}>当前连接数: {logConnectionCount}</span>
-        <span style={{ marginLeft: 20 }}>心跳检测次数: {logHeartbeatCount}</span>
         <span style={{ marginLeft: 20 }}>
           每页显示条数:
           <Select 
@@ -378,9 +351,10 @@ const StacksAlex: React.FC = () => {
             size="small" 
             style={{ width: 80, marginLeft: 10 }}
           >
+            <Option value={3}>3</Option>
             <Option value={5}>5</Option>
             <Option value={10}>10</Option>
-            <Option value={15}>15</Option>
+            <Option value={50}>50</Option>
             <Option value={100}>100</Option>
           </Select>
         </span>
@@ -395,7 +369,7 @@ const StacksAlex: React.FC = () => {
         boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
         marginBottom: 20
       }}>
-        {paginatedLogs.map((log, idx) => (
+        {paginatedLogs.map((log) => (
           <div 
             key={log._uid} 
             style={{ 
@@ -411,7 +385,6 @@ const StacksAlex: React.FC = () => {
             <span 
               style={{ 
                 fontSize: '1em', 
-                color: '#333', 
                 fontWeight: 'bold',
                 color: log.type === 'trade' ? '#2c3e50' : log.type === 'connection' ? '#42b983' : '#333'
               }}
@@ -632,7 +605,7 @@ const StacksAlex: React.FC = () => {
           <Table.Column
             title="金额"
             key="amount"
-            render={(text, record: any, index) => (
+            render={(_, record: any, index) => (
               <Select
                 value={record.amount}
                 onChange={(value) => {
@@ -654,7 +627,7 @@ const StacksAlex: React.FC = () => {
           <Table.Column
             title="DX"
             key="dx"
-            render={(text, record: any, index) => (
+            render={(_, record: any, index) => (
               <Input
                 value={record.dx}
                 onChange={(e) => {
@@ -671,7 +644,7 @@ const StacksAlex: React.FC = () => {
           <Table.Column
             title="DY"
             key="dy"
-            render={(text, record: any, index) => (
+            render={(_, record: any, index) => (
               <Input
                 value={record.dy}
                 onChange={(e) => {
@@ -688,7 +661,7 @@ const StacksAlex: React.FC = () => {
           <Table.Column
             title="费率"
             key="fee"
-            render={(text, record: any, index) => (
+            render={(_, record: any, index) => (
               <Select
                 value={record.fee}
                 onChange={(value) => {
@@ -712,7 +685,7 @@ const StacksAlex: React.FC = () => {
             key="direction"
             width={80}
             align="center"
-            render={(text, record: any, index) => (
+            render={(_, _record: any, index) => (
               <Tag color={index === 0 ? 'success' : 'warning'}>
                 {index === 0 ? 'S' : 'B'}
               </Tag>
@@ -723,7 +696,7 @@ const StacksAlex: React.FC = () => {
             key="action"
             width={120}
             align="center"
-            render={(text, record: any, index) => (
+            render={(_, _record: any, index) => (
               <Button 
                 type="primary" 
                 size="small" 
