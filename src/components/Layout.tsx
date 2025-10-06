@@ -4,7 +4,7 @@ import { Layout as AntLayout } from 'antd';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 
-const { Content } = AntLayout;
+const { Content, Footer } = AntLayout;
 
 const Layout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -29,6 +29,9 @@ const Layout: React.FC = () => {
         >
           <Outlet />
         </Content>
+        <Footer style={{ textAlign: 'center', padding: '16px 50px', background: '#fff' }}>
+          Web Bot React ©{new Date().getFullYear()} Created by mumugogoing
+        </Footer>
       </AntLayout>
     </AntLayout>
   );
