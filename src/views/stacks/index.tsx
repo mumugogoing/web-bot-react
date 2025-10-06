@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Table,
@@ -19,6 +19,16 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import {
+  getStacksTransactions,
+  parseStacksTransactionType,
+  parseStacksTransactionStatus,
+  formatStacksAddress,
+  formatStacksTimestamp,
+  parseContractPlatform,
+  parseSwapInfo,
+  type StacksTransaction,
+} from '@/api/stacks';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -28,12 +38,13 @@ interface MonitorData {
   timestamp: string;
   type: string;
   status: string;
-  amount: string;
+  platform: string;
+  swapInfo: string;
   address: string;
 }
 
 const StacksMonitor: React.FC = () => {
-  const [data] = useState<MonitorData[]>([]);
+  const [data, setData] = useState<MonitorData[]>([]);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<string>('');
@@ -42,14 +53,28 @@ const StacksMonitor: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [total, setTotal] = useState(0);
 
   // 获取监控数据
   const fetchData = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const result = await getStacksMonitorData(currentPage, pageSize);
-      // setData(result.items);
+      const offset = (currentPage - 1) * pageSize;
+      const result = await getStacksTransactions(pageSize, offset);
+      
+      // 转换数据格式
+      const transformedData: MonitorData[] = result.results.map((tx: StacksTransaction) => ({
+        id: tx.tx_id,
+        timestamp: formatStacksTimestamp(tx.burn_block_time),
+        type: parseStacksTransactionType(tx.tx_type),
+        status: parseStacksTransactionStatus(tx.tx_status),
+        platform: tx.contract_call ? parseContractPlatform(tx.contract_call.contract_id) : '-',
+        swapInfo: parseSwapInfo(tx),
+        address: tx.sender_address,
+      }));
+      
+      setData(transformedData);
+      setTotal(result.total);
       setLastUpdateTime(new Date().toLocaleTimeString('zh-CN'));
       message.success('数据已更新');
     } catch (error) {
@@ -61,7 +86,11 @@ const StacksMonitor: React.FC = () => {
   };
 
   // 自动刷新
-  React.useEffect(() => {
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
     let interval: number | undefined;
     if (autoRefresh) {
       interval = window.setInterval(() => {
@@ -76,13 +105,16 @@ const StacksMonitor: React.FC = () => {
   // 表格列定义
   const columns: ColumnsType<MonitorData> = [
     {
-      title: 'ID',
+      title: '交易ID',
       dataIndex: 'id',
       key: 'id',
       width: 150,
+      render: (id: string) => (
+        <Text copyable={{ text: id }}>{id.substring(0, 10)}...</Text>
+      ),
     },
     {
-      title: '时间戳',
+      title: '时间',
       dataIndex: 'timestamp',
       key: 'timestamp',
       width: 180,
@@ -100,24 +132,36 @@ const StacksMonitor: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 120,
+      width: 100,
       render: (status: string) => (
-        <Tag color={status === 'success' ? 'green' : 'orange'}>{status}</Tag>
+        <Tag color={status === '成功' ? 'green' : status === '待处理' ? 'orange' : 'red'}>{status}</Tag>
       ),
     },
     {
-      title: '金额',
-      dataIndex: 'amount',
-      key: 'amount',
+      title: '平台',
+      dataIndex: 'platform',
+      key: 'platform',
       width: 120,
+      render: (platform: string) => (
+        <Tag color="purple">{platform}</Tag>
+      ),
     },
     {
-      title: '地址',
+      title: '交易信息',
+      dataIndex: 'swapInfo',
+      key: 'swapInfo',
+      width: 250,
+      render: (swapInfo: string) => (
+        swapInfo ? <Text strong style={{ color: '#1890ff' }}>{swapInfo}</Text> : <Text type="secondary">-</Text>
+      ),
+    },
+    {
+      title: '发送地址',
       dataIndex: 'address',
       key: 'address',
-      width: 200,
+      width: 180,
       render: (address: string) => (
-        <Text copyable={{ text: address }}>{address.substring(0, 10)}...</Text>
+        <Text copyable={{ text: address }}>{formatStacksAddress(address)}</Text>
       ),
     },
   ];
@@ -126,7 +170,8 @@ const StacksMonitor: React.FC = () => {
   const filteredData = data.filter(item => {
     const matchSearch = !searchText || 
       item.id.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.address.toLowerCase().includes(searchText.toLowerCase());
+      item.address.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.swapInfo.toLowerCase().includes(searchText.toLowerCase());
     const matchType = selectedTypes.length === 0 || selectedTypes.includes(item.type);
     const matchStatus = selectedStatuses.length === 0 || selectedStatuses.includes(item.status);
     return matchSearch && matchType && matchStatus;
@@ -197,11 +242,11 @@ const StacksMonitor: React.FC = () => {
               刷新数据
             </Button>
             <Input
-              placeholder="搜索ID或地址"
+              placeholder="搜索交易ID、地址或交易信息"
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 300 }}
+              style={{ width: 350 }}
             />
             <Button
               onClick={() => {
@@ -224,9 +269,10 @@ const StacksMonitor: React.FC = () => {
               onChange={setSelectedTypes}
               style={{ minWidth: 200 }}
             >
-              <Option value="transfer">转账</Option>
-              <Option value="swap">交换</Option>
-              <Option value="contract">合约调用</Option>
+              <Option value="代币转账">代币转账</Option>
+              <Option value="合约调用">合约调用</Option>
+              <Option value="智能合约">智能合约</Option>
+              <Option value="Coinbase">Coinbase</Option>
             </Select>
             
             <Text style={{ marginLeft: 16 }}>状态筛选：</Text>
@@ -237,9 +283,10 @@ const StacksMonitor: React.FC = () => {
               onChange={setSelectedStatuses}
               style={{ minWidth: 200 }}
             >
-              <Option value="success">成功</Option>
-              <Option value="pending">待处理</Option>
-              <Option value="failed">失败</Option>
+              <Option value="成功">成功</Option>
+              <Option value="待处理">待处理</Option>
+              <Option value="响应中止">响应中止</Option>
+              <Option value="后置条件中止">后置条件中止</Option>
             </Select>
           </Space>
         </Space>
@@ -255,7 +302,7 @@ const StacksMonitor: React.FC = () => {
           pagination={{
             current: currentPage,
             pageSize: pageSize,
-            total: filteredData.length,
+            total: total,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条记录`,
@@ -263,9 +310,9 @@ const StacksMonitor: React.FC = () => {
               setCurrentPage(page);
               if (newPageSize) setPageSize(newPageSize);
             },
-            pageSizeOptions: ['3', '5', '10', '50', '100'],
+            pageSizeOptions: ['3', '5', '10', '20', '50', '100'],
           }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1200 }}
           size="small"
         />
       </Card>

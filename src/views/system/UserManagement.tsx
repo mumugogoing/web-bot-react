@@ -40,12 +40,16 @@ const UserManagement: React.FC = () => {
         pageNum, 
         pageSize 
       });
+      console.log('UserManagement response:', response);
       if (response.data.code === 201) {
         setUsers(response.data.data.list || []);
         setTotal(response.data.data.total || 0);
+      } else {
+        message.error(`获取用户列表失败: ${response.data.msg || '未知错误'}`);
       }
-    } catch (error) {
-      message.error('获取用户列表失败');
+    } catch (error: any) {
+      console.error('获取用户列表失败:', error);
+      message.error(`获取用户列表失败: ${error.message || '网络错误'}`);
     } finally {
       setLoading(false);
     }
@@ -114,8 +118,9 @@ const UserManagement: React.FC = () => {
       }
       setModalVisible(false);
       fetchUsers();
-    } catch (error) {
-      message.error('操作失败');
+    } catch (error: any) {
+      console.error('操作失败:', error);
+      message.error(`操作失败: ${error.message || '未知错误'}`);
     }
   };
 
