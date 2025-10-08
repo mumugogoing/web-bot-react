@@ -82,7 +82,7 @@ const AlexSwap: React.FC = () => {
   // DOG/SBTC 交易对
   const [dogSbtcForm1, setDogSbtcForm1] = useState<DataType>({
     amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-abtc',  // DOG合约地址
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-wdog',  // DOG合约地址
     dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',  // SBTC合约地址
     su: 'sell',
     fee: '0.1211',
@@ -94,7 +94,7 @@ const AlexSwap: React.FC = () => {
 
   const [dogSbtcForm2, setDogSbtcForm2] = useState<DataType>({
     amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-abtc',
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-wdog',
     dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',
     su: 'buy',
     fee: '0.1211',
