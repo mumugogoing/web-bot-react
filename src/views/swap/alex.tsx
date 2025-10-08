@@ -52,7 +52,6 @@ const AlexSwap: React.FC = () => {
   const [sumTableData, setSumTableData] = useState<SumTableData | null>(null);
   const [otherTableData, setOtherTableData] = useState<any[]>([]);
   const [otherTableColumns, setOtherTableColumns] = useState<any[]>([]);
-  const [balanceData, setBalanceData] = useState<any>(null);
   
   // 交易表单数据
   const [xykForm1, setXykForm1] = useState<DataType>({
@@ -79,140 +78,6 @@ const AlexSwap: React.FC = () => {
     txStatus: ''
   });
 
-  // DOG/SBTC 交易对
-  const [dogSbtcForm1, setDogSbtcForm1] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-wdog',  // DOG合约地址
-    dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',  // SBTC合约地址
-    su: 'sell',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  const [dogSbtcForm2, setDogSbtcForm2] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-wdog',
-    dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',
-    su: 'buy',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  // ALEX/STX 交易对
-  const [alexStxForm1, setAlexStxForm1] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.age000-governance-token',  // ALEX合约地址
-    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
-    su: 'sell',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  const [alexStxForm2, setAlexStxForm2] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.age000-governance-token',
-    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
-    su: 'buy',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  // ABTC/SUSDT 交易对
-  const [abtcSusdtForm1, setAbtcSusdtForm1] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-abtc',  // ABTC合约地址
-    dy: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-susdt',  // SUSDT合约地址
-    su: 'sell',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  const [abtcSusdtForm2, setAbtcSusdtForm2] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-abtc',
-    dy: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-susdt',
-    su: 'buy',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  // AEUSDC/USDA 交易对
-  const [aeusdcUsdaForm1, setAeusdcUsdaForm1] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc',
-    dy: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',  // USDA合约地址
-    su: 'sell',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  const [aeusdcUsdaForm2, setAeusdcUsdaForm2] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc',
-    dy: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
-    su: 'buy',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  // USDA/STX 交易对
-  const [usdaStxForm1, setUsdaStxForm1] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
-    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
-    su: 'sell',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  const [usdaStxForm2, setUsdaStxForm2] = useState<DataType>({
-    amount: 1000,
-    dx: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
-    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
-    su: 'buy',
-    fee: '0.1211',
-    mindy: '0',
-    profit: 1,
-    txId: '',
-    txStatus: ''
-  });
-
-  // 转账表单
-  const [transferForm, setTransferForm] = useState({
-    token: '',
-    exchange: '',
-    recipient: '',
-    nonce: '',
-    amount: ''
-  });
-
   // Zest表单
   const [zestForm, setZestForm] = useState({
     action: '',
@@ -221,19 +86,6 @@ const AlexSwap: React.FC = () => {
     fee: '0.1',
     coin: 'sbtc'
   });
-
-  // 代币选项
-  const tokenOptions = [
-    { name: 'stx', address: 'stx.1000', balance: '1000' },
-    { name: 'alex', address: 'alex.10000', balance: '10000' }
-  ];
-
-  // 交易所选项
-  const exchangeOptions: Record<string, string> = {
-    'Geta': 'Geta.SP3KBWF7P7FBDPCJGKT749WSXTTDTQN3Y2WSQZ58W.',
-    '币安STX': '交易所B.SP2TA4FGB43WVAS8MVS6YCWTSN2BZNQ1ASGEAKSDD.100398196',
-    '交易所C': '交易所C.SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.87654321'
-  };
 
   // 格式化数值
   const formatValue = (key: string, val: any) => {
@@ -253,7 +105,6 @@ const AlexSwap: React.FC = () => {
     
     try {
       const res: any = await calcsumdc({});
-      setBalanceData(res.data || res);
       
       const sumData = {
         sumStx: res.data ? formatValue('sumStx', res.data.sumStx) : '加载中...',
@@ -455,20 +306,6 @@ const AlexSwap: React.FC = () => {
     } catch (e: any) {
       message.error(`查询交易状态失败: ${e.message || e}`);
     }
-  };
-
-  // 检查头部交易状态
-  const checkTxStatusHeader = async () => {
-    const rows = [xykForm1, xykForm2];
-    const hasAnyTxId = rows.some(r => !!r.txId);
-    
-    if (!hasAnyTxId) {
-      message.warning('没有可查询的txid');
-      return;
-    }
-    
-    await checkTxStatus(xykForm1, setXykForm1);
-    await checkTxStatus(xykForm2, setXykForm2);
   };
 
   // 创建CEX订单
@@ -758,61 +595,6 @@ const AlexSwap: React.FC = () => {
         <Table
           dataSource={[xykForm1, xykForm2]}
           columns={tradeColumns}
-          pagination={false}
-          bordered
-        />
-      </Card>
-
-      {/* DOG/SBTC 交易对 */}
-      <Card style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>DOG / SBTC</div>
-        <Table
-          dataSource={[dogSbtcForm1, dogSbtcForm2]}
-          columns={createTradeColumns(dogSbtcForm1, setDogSbtcForm1, dogSbtcForm2, setDogSbtcForm2, 'DOG/SBTC')}
-          pagination={false}
-          bordered
-        />
-      </Card>
-
-      {/* ALEX/STX 交易对 */}
-      <Card style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>ALEX / STX</div>
-        <Table
-          dataSource={[alexStxForm1, alexStxForm2]}
-          columns={createTradeColumns(alexStxForm1, setAlexStxForm1, alexStxForm2, setAlexStxForm2, 'ALEX/STX')}
-          pagination={false}
-          bordered
-        />
-      </Card>
-
-      {/* ABTC/SUSDT 交易对 */}
-      <Card style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>ABTC / SUSDT</div>
-        <Table
-          dataSource={[abtcSusdtForm1, abtcSusdtForm2]}
-          columns={createTradeColumns(abtcSusdtForm1, setAbtcSusdtForm1, abtcSusdtForm2, setAbtcSusdtForm2, 'ABTC/SUSDT')}
-          pagination={false}
-          bordered
-        />
-      </Card>
-
-      {/* AEUSDC/USDA 交易对 */}
-      <Card style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>AEUSDC / USDA</div>
-        <Table
-          dataSource={[aeusdcUsdaForm1, aeusdcUsdaForm2]}
-          columns={createTradeColumns(aeusdcUsdaForm1, setAeusdcUsdaForm1, aeusdcUsdaForm2, setAeusdcUsdaForm2, 'AEUSDC/USDA')}
-          pagination={false}
-          bordered
-        />
-      </Card>
-
-      {/* USDA/STX 交易对 */}
-      <Card style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>USDA / STX</div>
-        <Table
-          dataSource={[usdaStxForm1, usdaStxForm2]}
-          columns={createTradeColumns(usdaStxForm1, setUsdaStxForm1, usdaStxForm2, setUsdaStxForm2, 'USDA/STX')}
           pagination={false}
           bordered
         />
