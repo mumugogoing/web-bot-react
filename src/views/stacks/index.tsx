@@ -39,6 +39,7 @@ interface MonitorData {
   type: string;
   status: string;
   platform: string;
+  contractId: string;
   swapInfo: string;
   address: string;
 }
@@ -47,12 +48,15 @@ const StacksMonitor: React.FC = () => {
   const [data, setData] = useState<MonitorData[]>([]);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState(30000); // 默认30秒
   const [lastUpdateTime, setLastUpdateTime] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
 
   // 获取监控数据
@@ -69,6 +73,7 @@ const StacksMonitor: React.FC = () => {
         type: parseStacksTransactionType(tx.tx_type),
         status: parseStacksTransactionStatus(tx.tx_status),
         platform: tx.contract_call ? parseContractPlatform(tx.contract_call.contract_id) : '-',
+        contractId: tx.contract_call ? tx.contract_call.contract_id : '',
         swapInfo: parseSwapInfo(tx),
         address: tx.sender_address,
       }));
@@ -95,12 +100,12 @@ const StacksMonitor: React.FC = () => {
     if (autoRefresh) {
       interval = window.setInterval(() => {
         fetchData();
-      }, 30000); // 每30秒刷新一次
+      }, refreshInterval); // 使用可配置的刷新间隔
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [autoRefresh]);
+  }, [autoRefresh, refreshInterval]);
 
   // 表格列定义
   const columns: ColumnsType<MonitorData> = [
@@ -174,7 +179,10 @@ const StacksMonitor: React.FC = () => {
       item.swapInfo.toLowerCase().includes(searchText.toLowerCase());
     const matchType = selectedTypes.length === 0 || selectedTypes.includes(item.type);
     const matchStatus = selectedStatuses.length === 0 || selectedStatuses.includes(item.status);
-    return matchSearch && matchType && matchStatus;
+    const matchPlatform = selectedPlatforms.length === 0 || selectedPlatforms.includes(item.platform);
+    const matchContract = selectedContracts.length === 0 || 
+      selectedContracts.some(contract => item.contractId.includes(contract));
+    return matchSearch && matchType && matchStatus && matchPlatform && matchContract;
   });
 
   return (
@@ -192,7 +200,7 @@ const StacksMonitor: React.FC = () => {
             <Statistic
               title="显示数据数"
               value={filteredData.length}
-              suffix="条"
+              suffix={`条 (共${data.length}条)`}
             />
           </Card>
         </Col>
@@ -217,13 +225,32 @@ const StacksMonitor: React.FC = () => {
         <Col span={6}>
           <Card>
             <Space direction="vertical" style={{ width: '100%' }}>
-              <Text>自动刷新 (30秒)</Text>
+              <Text>自动刷新</Text>
               <Switch
                 checked={autoRefresh}
                 onChange={setAutoRefresh}
                 checkedChildren="开启"
                 unCheckedChildren="关闭"
               />
+              {autoRefresh && (
+                <Select
+                  value={refreshInterval}
+                  onChange={setRefreshInterval}
+                  style={{ width: '100%' }}
+                  size="small"
+                >
+                  <Option value={1000}>1秒</Option>
+                  <Option value={3000}>3秒</Option>
+                  <Option value={5000}>5秒</Option>
+                  <Option value={10000}>10秒</Option>
+                  <Option value={60000}>1分钟</Option>
+                  <Option value={900000}>15分钟</Option>
+                  <Option value={1800000}>30分钟</Option>
+                  <Option value={3600000}>1小时</Option>
+                  <Option value={43200000}>12小时</Option>
+                  <Option value={86400000}>24小时</Option>
+                </Select>
+              )}
             </Space>
           </Card>
         </Col>
@@ -253,6 +280,8 @@ const StacksMonitor: React.FC = () => {
                 setSearchText('');
                 setSelectedTypes([]);
                 setSelectedStatuses([]);
+                setSelectedPlatforms([]);
+                setSelectedContracts([]);
                 setCurrentPage(1);
               }}
             >
@@ -287,6 +316,41 @@ const StacksMonitor: React.FC = () => {
               <Option value="待处理">待处理</Option>
               <Option value="响应中止">响应中止</Option>
               <Option value="后置条件中止">后置条件中止</Option>
+            </Select>
+            
+            <Text style={{ marginLeft: 16 }}>平台筛选：</Text>
+            <Select
+              mode="multiple"
+              placeholder="选择平台"
+              value={selectedPlatforms}
+              onChange={setSelectedPlatforms}
+              style={{ minWidth: 200 }}
+            >
+              <Option value="ALEX">ALEX</Option>
+              <Option value="Velar">Velar</Option>
+              <Option value="Bitflow">Bitflow</Option>
+              <Option value="Arkadiko">Arkadiko</Option>
+              <Option value="Stackswap">Stackswap</Option>
+              <Option value="CatamaranSwap">CatamaranSwap</Option>
+              <Option value="LNSwap">LNSwap</Option>
+              <Option value="Zest Protocol">Zest Protocol</Option>
+              <Option value="其他平台">其他平台</Option>
+            </Select>
+            
+            <Text style={{ marginLeft: 16 }}>合约筛选：</Text>
+            <Select
+              mode="multiple"
+              placeholder="输入合约地址"
+              value={selectedContracts}
+              onChange={setSelectedContracts}
+              style={{ minWidth: 250 }}
+              allowClear
+            >
+              <Option value="SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9">ALEX (SP3K8...)</Option>
+              <Option value="SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1">Velar (SP1Y5...)</Option>
+              <Option value="SP2XD7417HGPRTREMKF748VNEQPDRR0RMANB7X1NK">Bitflow (SP2XD...)</Option>
+              <Option value="SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR">Arkadiko (SP2C2...)</Option>
+              <Option value="SP1Z92MPDQEWZXW36VX71Q25HKF5K2EPCJ304F275">Stackswap (SP1Z9...)</Option>
             </Select>
           </Space>
         </Space>

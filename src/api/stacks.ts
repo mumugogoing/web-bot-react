@@ -201,6 +201,7 @@ export const parseTokenSymbol = (tokenId: string): string => {
     'stx': 'STX',
     'wrapped-stx': 'wSTX',
     'xbtc': 'xBTC',
+    'sbtc': 'sBTC',
     'aeusdc': 'aeUSDC',
     'susdt': 'sUSDT',
     'welsh': 'WELSH',
@@ -210,6 +211,10 @@ export const parseTokenSymbol = (tokenId: string): string => {
     'alex': 'ALEX',
     'diko': 'DIKO',
     'auto-alex': 'atALEX',
+    'dog': 'DOG',
+    'usda': 'USDA',
+    'token-stx': 'STX',
+    'token-aeusdc': 'aeUSDC',
   };
   
   const lower = tokenId.toLowerCase();
@@ -242,7 +247,9 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
   // 处理代币转账
   if (tx.token_transfer && tx.token_transfer.amount) {
     const amount = formatAmount(tx.token_transfer.amount);
-    return `${amount} STX (转账)`;
+    const fee = tx.fee_rate ? formatFeeAmount(tx.fee_rate) : '';
+    const feeInfo = fee ? ` | Fee: ${fee}` : '';
+    return `${amount} STX (转账)${feeInfo}`;
   }
   
   if (!tx.contract_call || !tx.contract_call.function_args) {
@@ -281,7 +288,7 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
     }
     
     // 解析函数参数
-    args.forEach((arg: any, index: number) => {
+    args.forEach((arg: any) => {
       if (typeof arg === 'object' && arg !== null) {
         const argStr = JSON.stringify(arg);
         
@@ -330,24 +337,28 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
       toToken = 'Token B';
     }
     
+    // 获取手续费信息
+    const fee = tx.fee_rate ? formatFeeAmount(tx.fee_rate) : '';
+    const feeInfo = fee ? ` | Fee: ${fee}` : '';
+    
     // 构建swap信息字符串
     if (fromToken && toToken) {
       if (fromAmount && toAmount) {
-        return `${fromAmount} ${fromToken} ==> ${toAmount} ${toToken}`;
+        return `${fromAmount} ${fromToken} ==> ${toAmount} ${toToken}${feeInfo}`;
       } else if (fromAmount) {
-        return `${fromAmount} ${fromToken} ==> ${toToken}`;
+        return `${fromAmount} ${fromToken} ==> ${toToken}${feeInfo}`;
       } else if (toAmount) {
-        return `${fromToken} ==> ${toAmount} ${toToken}`;
+        return `${fromToken} ==> ${toAmount} ${toToken}${feeInfo}`;
       } else {
-        return `${fromToken} ==> ${toToken}`;
+        return `${fromToken} ==> ${toToken}${feeInfo}`;
       }
     } else if (fromToken && fromAmount) {
-      return `${fromAmount} ${fromToken} (swap)`;
+      return `${fromAmount} ${fromToken} (swap)${feeInfo}`;
     }
     
     // 如果无法提取详细信息，至少标记为swap
     if (isSwapFunction) {
-      return `Swap (${functionName})`;
+      return `Swap (${functionName})${feeInfo}`;
     }
     
     return '';
@@ -355,6 +366,18 @@ export const parseSwapInfo = (tx: StacksTransaction): string => {
     console.error('解析swap信息失败:', error);
     return '';
   }
+};
+
+/**
+ * 格式化手续费金额
+ */
+const formatFeeAmount = (fee: string | number): string => {
+  const feeNum = typeof fee === 'string' ? parseInt(fee, 10) : fee;
+  if (isNaN(feeNum)) return '';
+  
+  // 转换为STX（从微STX）
+  const feeInSTX = feeNum / 1000000;
+  return feeInSTX.toFixed(6);
 };
 
 /**
