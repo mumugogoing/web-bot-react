@@ -260,12 +260,12 @@ const StacksAlex: React.FC = () => {
     };
   }, [autoRefresh3]);
 
-  // 组件挂载时获取初始数据
-  useEffect(() => {
-    fetchSumData();
-    fetchAbtcData();
-    fetchDtdhData();
-  }, []);
+  // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
+  // useEffect(() => {
+  //   fetchSumData();
+  //   fetchAbtcData();
+  //   fetchDtdhData();
+  // }, []);
 
   // XYK自动卖出
   const callXykAutoSell = async () => {
