@@ -79,6 +79,131 @@ const AlexSwap: React.FC = () => {
     txStatus: ''
   });
 
+  // DOG/SBTC 交易对
+  const [dogSbtcForm1, setDogSbtcForm1] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-wdog',  // DOG合约地址
+    dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',  // SBTC合约地址
+    su: 'sell',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  const [dogSbtcForm2, setDogSbtcForm2] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-wdog',
+    dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',
+    su: 'buy',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  // ALEX/STX 交易对
+  const [alexStxForm1, setAlexStxForm1] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.age000-governance-token',  // ALEX合约地址
+    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
+    su: 'sell',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  const [alexStxForm2, setAlexStxForm2] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.age000-governance-token',
+    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
+    su: 'buy',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  // ABTC/SUSDT 交易对
+  const [abtcSusdtForm1, setAbtcSusdtForm1] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-abtc',  // ABTC合约地址
+    dy: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-susdt',  // SUSDT合约地址
+    su: 'sell',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  const [abtcSusdtForm2, setAbtcSusdtForm2] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-abtc',
+    dy: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-susdt',
+    su: 'buy',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  // AEUSDC/USDA 交易对
+  const [aeusdcUsdaForm1, setAeusdcUsdaForm1] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc',
+    dy: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',  // USDA合约地址
+    su: 'sell',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  const [aeusdcUsdaForm2, setAeusdcUsdaForm2] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc',
+    dy: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
+    su: 'buy',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  // USDA/STX 交易对
+  const [usdaStxForm1, setUsdaStxForm1] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
+    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
+    su: 'sell',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
+  const [usdaStxForm2, setUsdaStxForm2] = useState<DataType>({
+    amount: 1000,
+    dx: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
+    dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
+    su: 'buy',
+    fee: '0.1211',
+    mindy: '0',
+    profit: 1,
+    txId: '',
+    txStatus: ''
+  });
+
   // 转账表单
   const [transferForm, setTransferForm] = useState({
     token: '',
@@ -181,10 +306,10 @@ const AlexSwap: React.FC = () => {
     };
   }, [autoRefresh]);
 
-  // 组件挂载时获取初始数据
-  useEffect(() => {
-    fetchSumData();
-  }, []);
+  // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
+  // useEffect(() => {
+  //   fetchSumData();
+  // }, []);
 
   // 获取dy值
   const handleGetDy = async (row: DataType, setRow: React.Dispatch<React.SetStateAction<DataType>>) => {
@@ -199,7 +324,7 @@ const AlexSwap: React.FC = () => {
       });
 
       if (response && response.data) {
-        let quote;
+        let quote: any;
         if (response.data.bestRoute?.quote) {
           quote = response.data.bestRoute.quote;
         } else if (response.data.quote) {
@@ -233,7 +358,7 @@ const AlexSwap: React.FC = () => {
       });
 
       if (response && response.data) {
-        let quote;
+        let quote: any;
         if (response.data.bestRoute?.quote) {
           quote = response.data.bestRoute.quote;
         } else if (response.data.quote) {
@@ -423,19 +548,25 @@ const AlexSwap: React.FC = () => {
   ];
 
   // 交易表格列定义
-  const tradeColumns: ColumnsType<DataType> = [
+  const createTradeColumns = (
+    form1: DataType, 
+    setForm1: React.Dispatch<React.SetStateAction<DataType>>,
+    form2: DataType,
+    setForm2: React.Dispatch<React.SetStateAction<DataType>>,
+    pairName: string
+  ): ColumnsType<DataType> => [
     {
       title: '金额',
       dataIndex: 'amount',
       key: 'amount',
-      render: (text: any, record: DataType, index: number) => (
+      render: (text: any, _record: DataType, index: number) => (
         <Input 
           value={text}
           onChange={(e) => {
             if (index === 0) {
-              setXykForm1(prev => ({ ...prev, amount: e.target.value }));
+              setForm1(prev => ({ ...prev, amount: e.target.value }));
             } else {
-              setXykForm2(prev => ({ ...prev, amount: e.target.value }));
+              setForm2(prev => ({ ...prev, amount: e.target.value }));
             }
           }}
         />
@@ -445,14 +576,14 @@ const AlexSwap: React.FC = () => {
       title: '最小获取',
       dataIndex: 'mindy',
       key: 'mindy',
-      render: (text: any, record: DataType, index: number) => (
+      render: (text: any, _record: DataType, index: number) => (
         <Input 
           value={text}
           onChange={(e) => {
             if (index === 0) {
-              setXykForm1(prev => ({ ...prev, mindy: e.target.value }));
+              setForm1(prev => ({ ...prev, mindy: e.target.value }));
             } else {
-              setXykForm2(prev => ({ ...prev, mindy: e.target.value }));
+              setForm2(prev => ({ ...prev, mindy: e.target.value }));
             }
           }}
         />
@@ -462,14 +593,14 @@ const AlexSwap: React.FC = () => {
       title: '费率',
       dataIndex: 'fee',
       key: 'fee',
-      render: (text: any, record: DataType, index: number) => (
+      render: (text: any, _record: DataType, index: number) => (
         <Input 
           value={text}
           onChange={(e) => {
             if (index === 0) {
-              setXykForm1(prev => ({ ...prev, fee: e.target.value }));
+              setForm1(prev => ({ ...prev, fee: e.target.value }));
             } else {
-              setXykForm2(prev => ({ ...prev, fee: e.target.value }));
+              setForm2(prev => ({ ...prev, fee: e.target.value }));
             }
           }}
         />
@@ -478,7 +609,7 @@ const AlexSwap: React.FC = () => {
     {
       title: '方向',
       key: 'direction',
-      render: (text: any, record: DataType, index: number) => (
+      render: (_text: any, _record: DataType, index: number) => (
         <Tag color={index === 0 ? 'green' : 'orange'}>
           {index === 0 ? 'sell' : 'buy'}
         </Tag>
@@ -487,14 +618,14 @@ const AlexSwap: React.FC = () => {
     {
       title: 'tx状态',
       key: 'txStatus',
-      render: (text: any, record: DataType, index: number) => (
+      render: (_text: any, record: DataType, index: number) => (
         <Button 
           type="link"
           onClick={() => {
             if (index === 0) {
-              checkTxStatus(xykForm1, setXykForm1);
+              checkTxStatus(form1, setForm1);
             } else {
-              checkTxStatus(xykForm2, setXykForm2);
+              checkTxStatus(form2, setForm2);
             }
           }}
         >
@@ -505,14 +636,14 @@ const AlexSwap: React.FC = () => {
     {
       title: '获取dy/dx',
       key: 'getDyDx',
-      render: (text: any, record: DataType, index: number) => (
+      render: (_text: any, _record: DataType, index: number) => (
         <Button
           type="primary"
           onClick={() => {
             if (index === 0) {
-              handleGetDy(xykForm1, setXykForm1);
+              handleGetDy(form1, setForm1);
             } else {
-              handleGetDx(xykForm2, setXykForm2);
+              handleGetDx(form2, setForm2);
             }
           }}
         >
@@ -523,18 +654,18 @@ const AlexSwap: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (text: any, record: DataType, index: number) => (
+      render: (_text: any, _record: DataType, index: number) => (
         <Button
           type="primary"
           onClick={() => {
             if (index === 0) {
-              confirmAndTrade(xykForm1, 'sell', setXykForm1);
+              confirmAndTrade(form1, 'sell', setForm1);
             } else {
-              confirmAndTrade(xykForm2, 'buy', setXykForm2);
+              confirmAndTrade(form2, 'buy', setForm2);
             }
           }}
         >
-          {index === 0 ? 'STX=>USDC' : 'USDC=>STX'}
+          {index === 0 ? `${pairName.split('/')[0]}=>${pairName.split('/')[1]}` : `${pairName.split('/')[1]}=>${pairName.split('/')[0]}`}
         </Button>
       )
     },
@@ -542,15 +673,15 @@ const AlexSwap: React.FC = () => {
       title: '利润',
       dataIndex: 'profit',
       key: 'profit',
-      render: (text: any, record: DataType, index: number) => (
+      render: (text: any, _record: DataType, index: number) => (
         <Input 
           value={text}
           onChange={(e) => {
             const value = Number(e.target.value);
             if (index === 0) {
-              setXykForm1(prev => ({ ...prev, profit: value }));
+              setForm1(prev => ({ ...prev, profit: value }));
             } else {
-              setXykForm2(prev => ({ ...prev, profit: value }));
+              setForm2(prev => ({ ...prev, profit: value }));
             }
           }}
         />
@@ -559,18 +690,18 @@ const AlexSwap: React.FC = () => {
     {
       title: 'CEX挂单',
       key: 'cexOrder',
-      render: (text: any, record: DataType, index: number) => (
+      render: (_text: any, _record: DataType, index: number) => (
         <Button
           type="primary"
           onClick={() => {
             if (index === 0) {
-              handleCreateCexOrder(xykForm1, 0);
+              handleCreateCexOrder(form1, 0);
             } else {
-              handleCreateCexOrder(xykForm2, 1);
+              handleCreateCexOrder(form2, 1);
             }
           }}
         >
-          {index === 0 ? 'USDC=>STX' : 'STX=>USDC'}
+          {index === 0 ? `${pairName.split('/')[1]}=>${pairName.split('/')[0]}` : `${pairName.split('/')[0]}=>${pairName.split('/')[1]}`}
         </Button>
       )
     },
@@ -580,6 +711,9 @@ const AlexSwap: React.FC = () => {
       render: () => <span>xyk</span>
     }
   ];
+
+  // 交易表格列定义 - STX/AEUSDC
+  const tradeColumns: ColumnsType<DataType> = createTradeColumns(xykForm1, setXykForm1, xykForm2, setXykForm2, 'STX/AEUSDC');
 
   return (
     <div className="app-container" style={{ padding: '20px' }}>
@@ -624,6 +758,61 @@ const AlexSwap: React.FC = () => {
         <Table
           dataSource={[xykForm1, xykForm2]}
           columns={tradeColumns}
+          pagination={false}
+          bordered
+        />
+      </Card>
+
+      {/* DOG/SBTC 交易对 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>DOG / SBTC</div>
+        <Table
+          dataSource={[dogSbtcForm1, dogSbtcForm2]}
+          columns={createTradeColumns(dogSbtcForm1, setDogSbtcForm1, dogSbtcForm2, setDogSbtcForm2, 'DOG/SBTC')}
+          pagination={false}
+          bordered
+        />
+      </Card>
+
+      {/* ALEX/STX 交易对 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>ALEX / STX</div>
+        <Table
+          dataSource={[alexStxForm1, alexStxForm2]}
+          columns={createTradeColumns(alexStxForm1, setAlexStxForm1, alexStxForm2, setAlexStxForm2, 'ALEX/STX')}
+          pagination={false}
+          bordered
+        />
+      </Card>
+
+      {/* ABTC/SUSDT 交易对 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>ABTC / SUSDT</div>
+        <Table
+          dataSource={[abtcSusdtForm1, abtcSusdtForm2]}
+          columns={createTradeColumns(abtcSusdtForm1, setAbtcSusdtForm1, abtcSusdtForm2, setAbtcSusdtForm2, 'ABTC/SUSDT')}
+          pagination={false}
+          bordered
+        />
+      </Card>
+
+      {/* AEUSDC/USDA 交易对 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>AEUSDC / USDA</div>
+        <Table
+          dataSource={[aeusdcUsdaForm1, aeusdcUsdaForm2]}
+          columns={createTradeColumns(aeusdcUsdaForm1, setAeusdcUsdaForm1, aeusdcUsdaForm2, setAeusdcUsdaForm2, 'AEUSDC/USDA')}
+          pagination={false}
+          bordered
+        />
+      </Card>
+
+      {/* USDA/STX 交易对 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>USDA / STX</div>
+        <Table
+          dataSource={[usdaStxForm1, usdaStxForm2]}
+          columns={createTradeColumns(usdaStxForm1, setUsdaStxForm1, usdaStxForm2, setUsdaStxForm2, 'USDA/STX')}
           pagination={false}
           bordered
         />
