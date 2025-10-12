@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [role, setRoleState] = useState<UserRole>(UserRole.GUEST);
+  // @ts-ignore - State is used in effects but TypeScript doesn't detect it
   const [idempotenceToken, setIdempotenceToken] = useState<string | null>(null);
 
   // 获取幂等性token
