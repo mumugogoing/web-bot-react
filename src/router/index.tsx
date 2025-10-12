@@ -9,6 +9,7 @@ import StarknetMonitor from '@/views/StarknetMonitor';
 import StacksMonitor from '@/views/stacks';
 import StacksAlex from '@/views/stacks/Alex';
 import StacksDex from '@/views/stacks/Dex';
+import SbtcMakerGun from '@/views/makergun/SbtcMakerGun';
 import Profile from '@/views/profile';
 import UserManagement from '@/views/system/UserManagement';
 import RoleManagement from '@/views/system/RoleManagement';
@@ -68,6 +69,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <StacksDex />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "makergun/sbtc",
+        element: (
+          <ProtectedRoute requiredRole={UserRole.USER}>
+            <SbtcMakerGun />
           </ProtectedRoute>
         ),
       },

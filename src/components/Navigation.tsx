@@ -32,6 +32,10 @@ const Navigation: React.FC = () => {
       key: '/swap',
     },
     {
+      label: <Link to="/makergun/sbtc">SBTC MakerGun</Link>,
+      key: '/makergun/sbtc',
+    },
+    {
       label: <Link to="/monitor">Starknet监控</Link>,
       key: '/monitor',
     },

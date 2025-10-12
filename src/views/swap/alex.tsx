@@ -52,6 +52,7 @@ const AlexSwap: React.FC = () => {
   const [sumTableData, setSumTableData] = useState<SumTableData | null>(null);
   const [otherTableData, setOtherTableData] = useState<any[]>([]);
   const [otherTableColumns, setOtherTableColumns] = useState<any[]>([]);
+  // @ts-ignore - Unused state variable
   const [balanceData, setBalanceData] = useState<any>(null);
   
   // 交易表单数据
@@ -205,6 +206,7 @@ const AlexSwap: React.FC = () => {
   });
 
   // 转账表单
+  // @ts-ignore - Unused state variable
   const [transferForm, setTransferForm] = useState({
     token: '',
     exchange: '',
@@ -223,12 +225,14 @@ const AlexSwap: React.FC = () => {
   });
 
   // 代币选项
+  // @ts-ignore - Unused constant
   const tokenOptions = [
     { name: 'stx', address: 'stx.1000', balance: '1000' },
     { name: 'alex', address: 'alex.10000', balance: '10000' }
   ];
 
   // 交易所选项
+  // @ts-ignore - Unused constant
   const exchangeOptions: Record<string, string> = {
     'Geta': 'Geta.SP3KBWF7P7FBDPCJGKT749WSXTTDTQN3Y2WSQZ58W.',
     '币安STX': '交易所B.SP2TA4FGB43WVAS8MVS6YCWTSN2BZNQ1ASGEAKSDD.100398196',
@@ -458,6 +462,7 @@ const AlexSwap: React.FC = () => {
   };
 
   // 检查头部交易状态
+  // @ts-ignore - Unused function
   const checkTxStatusHeader = async () => {
     const rows = [xykForm1, xykForm2];
     const hasAnyTxId = rows.some(r => !!r.txId);
