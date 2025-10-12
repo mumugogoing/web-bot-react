@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole, type UserInfo } from '@/types/auth';
 import { getToken, setToken as saveToken, removeToken } from '@/utils/cookies';
-import { login as loginApi, logout as logoutApi, getUserInfo as getUserInfoApi, getIdempotenceToken } from '@/api/auth';
+import { login as loginApi, logout as logoutApi, getUserInfo as getUserInfoApi } from '@/api/auth';
 import { message } from 'antd';
 import { encryptPassword } from '@/utils/encrypt';
 
@@ -13,7 +13,6 @@ interface AuthContextType {
   login: (username: string, password: string, captchaId?: string, captchaAnswer?: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUserInfo: () => Promise<void>;
-  refreshIdempotenceToken: () => Promise<void>;
   setRole: (role: UserRole) => void;
   canAccess: (requiredRole: UserRole) => boolean;
 }
@@ -25,20 +24,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [role, setRoleState] = useState<UserRole>(UserRole.GUEST);
-  const [idempotenceToken, setIdempotenceToken] = useState<string | null>(null);
-
-  // 获取幂等性token
-  const refreshIdempotenceToken = async () => {
-    try {
-      const response = await getIdempotenceToken();
-      if (response.data) {
-        setIdempotenceToken(response.data);
-        localStorage.setItem('api-idempotence-token', response.data);
-      }
-    } catch (error) {
-      console.error('Failed to refresh idempotence token:', error);
-    }
-  };
 
   // 从后端角色映射到前端角色
   const mapBackendRoleToFrontend = (backendRoles: string[]): UserRole => {
@@ -93,10 +78,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         saveToken(response.data.token);
         
         // 登录成功后获取用户信息
+        // 幂等性token现在由响应拦截器自动处理
         await fetchUserInfo();
-        
-        // 刷新幂等性token
-        await refreshIdempotenceToken();
         
         message.success('登录成功');
       }
@@ -174,7 +157,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       logout,
       fetchUserInfo,
-      refreshIdempotenceToken,
       setRole, 
       canAccess 
     }}>

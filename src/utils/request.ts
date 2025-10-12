@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { getToken, removeToken, getIdempotenceToken } from './cookies';
+import { getToken, removeToken, getIdempotenceToken, setIdempotenceToken } from './cookies';
 import { signToken } from './signToken';
 
 // 创建 axios 实例
@@ -50,6 +50,12 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse) => {
+    // 从响应头中提取并保存幂等性token（如果后端返回了新token）
+    const newIdempotenceToken = response.headers['api-idempotence-token'];
+    if (newIdempotenceToken) {
+      setIdempotenceToken(newIdempotenceToken);
+    }
+    
     // 处理响应数据
     const res = response.data;
     if (res.code !== 201) {
