@@ -161,11 +161,6 @@ const StacksAlex: React.FC = () => {
 
   // 获取ABTC数据
   const fetchAbtcData = async () => {
-    // 当交易所隐藏时，不需要计算套利机会
-    if (!showOtherData) {
-      setAbtcDataFetchTime('交易所隐藏时不计算套利机会');
-      return;
-    }
     if (isFetchingAbtcData) return;
     setIsFetchingAbtcData(true);
     const startTime = Date.now();
@@ -198,11 +193,6 @@ const StacksAlex: React.FC = () => {
 
   // 获取DTDH数据
   const fetchDtdhData = async () => {
-    // 当交易所隐藏时，不需要计算套利机会
-    if (!showOtherData) {
-      setDtdhDataFetchTime('交易所隐藏时不计算套利机会');
-      return;
-    }
     if (isFetchingDtdhData) return;
     setIsFetchingDtdhData(true);
     const startTime = Date.now();
@@ -248,8 +238,7 @@ const StacksAlex: React.FC = () => {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-    // 当交易所隐藏时，停止自动刷新套利机会数据
-    if (autoRefresh2 && showOtherData) {
+    if (autoRefresh2) {
       intervalId = setInterval(() => {
         fetchAbtcData();
       }, 6000);
@@ -257,12 +246,11 @@ const StacksAlex: React.FC = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh2, showOtherData]);
+  }, [autoRefresh2]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-    // 当交易所隐藏时，停止自动刷新套利机会数据
-    if (autoRefresh3 && showOtherData) {
+    if (autoRefresh3) {
       intervalId = setInterval(() => {
         fetchDtdhData();
       }, 6000);
@@ -270,7 +258,7 @@ const StacksAlex: React.FC = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh3, showOtherData]);
+  }, [autoRefresh3]);
 
   // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
   // useEffect(() => {
@@ -319,21 +307,7 @@ const StacksAlex: React.FC = () => {
 
   // 切换显示其他数据
   const toggleOtherData = () => {
-    const newShowOtherData = !showOtherData;
-    setShowOtherData(newShowOtherData);
-    
-    // 当隐藏交易所时，清空套利机会数据并显示提示
-    if (!newShowOtherData) {
-      setAbtcTableData(null);
-      setDtdhTableData(null);
-      setAbtcDataFetchTime('交易所隐藏时不计算套利机会');
-      setDtdhDataFetchTime('交易所隐藏时不计算套利机会');
-      // 如果自动刷新开启，也会被停止（通过 useEffect 依赖）
-    } else {
-      // 当显示交易所时，重新获取套利机会数据
-      fetchAbtcData();
-      fetchDtdhData();
-    }
+    setShowOtherData(!showOtherData);
   };
 
   // 合并表格数据
