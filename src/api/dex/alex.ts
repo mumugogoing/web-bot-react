@@ -62,3 +62,19 @@ export const checkTxStatusApi = (txid: string) =>
     method: 'get',
     params: { txid }
   });
+
+// 监控指定地址的待处理交易
+export const monitorPendingTx = (params: { address: string }) =>
+  request({
+    url: '/dex/monitor/pending',
+    method: 'get',
+    params
+  });
+
+// xykserialize 交易提交
+export const xykSerialize = (data: any) =>
+  request({
+    url: '/dex/xykserialize',
+    method: 'post',
+    data
+  });

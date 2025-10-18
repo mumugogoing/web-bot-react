@@ -40,8 +40,26 @@ const Navigation: React.FC = () => {
       key: '/monitor',
     },
     {
-      label: <Link to="/stacks">Stacks监控</Link>,
-      key: '/stacks',
+      label: 'Stacks',
+      key: 'stacks',
+      children: [
+        {
+          label: <Link to="/stacks">交易监控</Link>,
+          key: '/stacks',
+        },
+        {
+          label: <Link to="/stacks/alex">ALEX DEX</Link>,
+          key: '/stacks/alex',
+        },
+        {
+          label: <Link to="/stacks/dex">DEX 交易</Link>,
+          key: '/stacks/dex',
+        },
+        {
+          label: <Link to="/stacks/pending">待处理监控</Link>,
+          key: '/stacks/pending',
+        },
+      ],
     },
     // System Management - Only visible to admins
     ...(role === UserRole.ADMIN ? [{
