@@ -335,14 +335,17 @@ const AlexSwap: React.FC = () => {
           if (response?.data?.hasPending) {
             setPendingTxDetected(true);
             
-            // 防止重复提交
-            if (!isSubmitting) {
-              const logMessage = `${currentTime} - 检测到pending交易，自动提交xykserialize`;
-              setOrderPressingLog(prev => [logMessage, ...prev].slice(0, 10));
-              
-              // 自动提交xykserialize交易
-              await handleAutoSubmitXykSerialize();
-            }
+            // 防止重复提交 - check isSubmitting directly from state
+            setIsSubmitting(prev => {
+              if (!prev) {
+                const logMessage = `${currentTime} - 检测到pending交易，自动提交xykserialize`;
+                setOrderPressingLog(prevLog => [logMessage, ...prevLog].slice(0, 10));
+                
+                // 自动提交xykserialize交易
+                handleAutoSubmitXykSerialize();
+              }
+              return prev;
+            });
           } else {
             setPendingTxDetected(false);
           }
@@ -367,7 +370,7 @@ const AlexSwap: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [orderPressingEnabled, monitorAddress, isSubmitting]);
+  }, [orderPressingEnabled, monitorAddress]);
 
   // 自动提交xykserialize
   const handleAutoSubmitXykSerialize = async () => {
@@ -376,11 +379,14 @@ const AlexSwap: React.FC = () => {
       return;
     }
     
+    // Timeout ID for cleanup
+    let cooldownTimeoutId: NodeJS.Timeout | null = null;
+    
     try {
       setIsSubmitting(true);
       
       // 参数验证
-      if (!xykForm1.amount || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+      if (!xykForm1.amount && xykForm1.amount !== 0 || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
         const currentTime = new Date().toLocaleTimeString('zh-CN');
         const errorMessage = `${currentTime} - 参数验证失败: 交易参数不完整`;
         setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
@@ -418,10 +424,17 @@ const AlexSwap: React.FC = () => {
       message.error('自动提交xykserialize失败: ' + (error.message || '未知错误'));
     } finally {
       // 3秒后允许再次提交，防止过于频繁
-      setTimeout(() => {
+      cooldownTimeoutId = setTimeout(() => {
         setIsSubmitting(false);
       }, 3000);
     }
+    
+    // Return cleanup function
+    return () => {
+      if (cooldownTimeoutId) {
+        clearTimeout(cooldownTimeoutId);
+      }
+    };
   };
 
   // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
