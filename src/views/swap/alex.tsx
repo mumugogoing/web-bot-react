@@ -63,6 +63,7 @@ const AlexSwap: React.FC = () => {
   const [pendingTxDetected, setPendingTxDetected] = useState(false);
   const [lastCheckedTime, setLastCheckedTime] = useState('');
   const [orderPressingLog, setOrderPressingLog] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 防止重复提交
   
   // 交易表单数据
   const [xykForm1, setXykForm1] = useState<DataType>({
@@ -333,11 +334,15 @@ const AlexSwap: React.FC = () => {
           
           if (response?.data?.hasPending) {
             setPendingTxDetected(true);
-            const logMessage = `${currentTime} - 检测到pending交易，自动提交xykserialize`;
-            setOrderPressingLog(prev => [logMessage, ...prev].slice(0, 10));
             
-            // 自动提交xykserialize交易
-            await handleAutoSubmitXykSerialize();
+            // 防止重复提交
+            if (!isSubmitting) {
+              const logMessage = `${currentTime} - 检测到pending交易，自动提交xykserialize`;
+              setOrderPressingLog(prev => [logMessage, ...prev].slice(0, 10));
+              
+              // 自动提交xykserialize交易
+              await handleAutoSubmitXykSerialize();
+            }
           } else {
             setPendingTxDetected(false);
           }
@@ -362,11 +367,35 @@ const AlexSwap: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [orderPressingEnabled, monitorAddress]);
+  }, [orderPressingEnabled, monitorAddress, isSubmitting]);
 
   // 自动提交xykserialize
   const handleAutoSubmitXykSerialize = async () => {
+    // 防止并发提交
+    if (isSubmitting) {
+      return;
+    }
+    
     try {
+      setIsSubmitting(true);
+      
+      // 参数验证
+      if (!xykForm1.amount || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+        const currentTime = new Date().toLocaleTimeString('zh-CN');
+        const errorMessage = `${currentTime} - 参数验证失败: 交易参数不完整`;
+        setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+        message.error('交易参数不完整，请检查STX/AEUSDC交易表单');
+        return;
+      }
+      
+      if (!xykForm1.mindy || xykForm1.mindy === '0') {
+        const currentTime = new Date().toLocaleTimeString('zh-CN');
+        const errorMessage = `${currentTime} - 参数验证失败: 请先获取最小获取数量`;
+        setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+        message.error('请先获取dy值再启用压单功能');
+        return;
+      }
+      
       const params = {
         amount: String(xykForm1.amount),
         dx: xykForm1.dx,
@@ -387,6 +416,11 @@ const AlexSwap: React.FC = () => {
       const errorMessage = `${currentTime} - xykserialize提交失败: ${error.message || '未知错误'}`;
       setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
       message.error('自动提交xykserialize失败: ' + (error.message || '未知错误'));
+    } finally {
+      // 3秒后允许再次提交，防止过于频繁
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 3000);
     }
   };
 
@@ -845,10 +879,15 @@ const AlexSwap: React.FC = () => {
             <Switch 
               checked={orderPressingEnabled}
               onChange={(checked) => {
-                setOrderPressingEnabled(checked);
                 if (checked && !monitorAddress) {
                   message.warning('请先输入要监控的地址');
+                  return;
                 }
+                if (checked && (!xykForm1.mindy || xykForm1.mindy === '0')) {
+                  message.warning('请先在STX/AEUSDC交易表单中获取dy值');
+                  return;
+                }
+                setOrderPressingEnabled(checked);
               }}
               checkedChildren="压单开启"
               unCheckedChildren="压单关闭"
@@ -862,6 +901,9 @@ const AlexSwap: React.FC = () => {
             <Tag color={pendingTxDetected ? 'red' : 'green'}>
               {pendingTxDetected ? 'Pending交易检测中' : '无Pending交易'}
             </Tag>
+            {isSubmitting && (
+              <Tag color="blue">提交中...</Tag>
+            )}
             {lastCheckedTime && (
               <span style={{ fontSize: '12px', color: '#666' }}>
                 最后检查: {lastCheckedTime}
@@ -882,8 +924,14 @@ const AlexSwap: React.FC = () => {
           )}
           
           <div style={{ fontSize: '12px', color: '#999', marginTop: '10px' }}>
-            说明：开启压单功能后，系统将每2秒检查一次指定地址的pending交易状态。
-            一旦检测到pending交易，将自动提交xykserialize交易。
+            <div style={{ color: '#ff4d4f', marginBottom: '5px' }}>
+              ⚠️ 重要提示：开启前请确保已在下方STX/AEUSDC交易表单中设置好金额、费率并获取dy值
+            </div>
+            <div>
+              说明：开启压单功能后，系统将每2秒检查一次指定地址的pending交易状态。
+              一旦检测到pending交易，将自动使用当前表单参数提交xykserialize交易。
+              为防止重复提交，每次提交后会有3秒冷却时间。
+            </div>
           </div>
         </Space>
       </Card>
