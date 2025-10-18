@@ -9,6 +9,7 @@ import StarknetMonitor from '@/views/StarknetMonitor';
 import StacksMonitor from '@/views/stacks';
 import StacksAlex from '@/views/stacks/Alex';
 import StacksDex from '@/views/stacks/Dex';
+import PendingMonitor from '@/views/stacks/PendingMonitor';
 import SbtcMakerGun from '@/views/makergun/SbtcMakerGun';
 import Profile from '@/views/profile';
 import UserManagement from '@/views/system/UserManagement';
@@ -69,6 +70,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <StacksDex />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "stacks/pending",
+        element: (
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <PendingMonitor />
           </ProtectedRoute>
         ),
       },
