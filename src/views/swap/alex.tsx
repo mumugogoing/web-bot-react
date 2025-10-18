@@ -19,7 +19,9 @@ import {
   xykfetchdy,
   xykfetchdx,
   createCexOrder,
-  checkTxStatusApi
+  checkTxStatusApi,
+  xykSerialize,
+  checkAddressPendingTx
 } from '@/api/dex/alex';
 
 interface DataType {
@@ -54,6 +56,13 @@ const AlexSwap: React.FC = () => {
   const [otherTableColumns, setOtherTableColumns] = useState<any[]>([]);
   // @ts-ignore - Unused state variable
   const [balanceData, setBalanceData] = useState<any>(null);
+  
+  // 压单功能状态
+  const [orderPressingEnabled, setOrderPressingEnabled] = useState(false);
+  const [monitorAddress, setMonitorAddress] = useState('');
+  const [pendingTxDetected, setPendingTxDetected] = useState(false);
+  const [lastCheckedTime, setLastCheckedTime] = useState('');
+  const [orderPressingLog, setOrderPressingLog] = useState<string[]>([]);
   
   // 交易表单数据
   const [xykForm1, setXykForm1] = useState<DataType>({
@@ -309,6 +318,77 @@ const AlexSwap: React.FC = () => {
       }
     };
   }, [autoRefresh]);
+
+  // 监控pending交易并自动提交
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
+    if (orderPressingEnabled && monitorAddress) {
+      const checkPendingTx = async () => {
+        try {
+          const currentTime = new Date().toLocaleTimeString('zh-CN');
+          setLastCheckedTime(currentTime);
+          
+          const response: any = await checkAddressPendingTx(monitorAddress);
+          
+          if (response?.data?.hasPending) {
+            setPendingTxDetected(true);
+            const logMessage = `${currentTime} - 检测到pending交易，自动提交xykserialize`;
+            setOrderPressingLog(prev => [logMessage, ...prev].slice(0, 10));
+            
+            // 自动提交xykserialize交易
+            await handleAutoSubmitXykSerialize();
+          } else {
+            setPendingTxDetected(false);
+          }
+        } catch (error: any) {
+          const currentTime = new Date().toLocaleTimeString('zh-CN');
+          const errorMessage = `${currentTime} - 监控错误: ${error.message || '未知错误'}`;
+          setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+        }
+      };
+      
+      // 立即检查一次
+      checkPendingTx();
+      
+      // 每2秒检查一次
+      intervalId = setInterval(() => {
+        checkPendingTx();
+      }, 2000);
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [orderPressingEnabled, monitorAddress]);
+
+  // 自动提交xykserialize
+  const handleAutoSubmitXykSerialize = async () => {
+    try {
+      const params = {
+        amount: String(xykForm1.amount),
+        dx: xykForm1.dx,
+        dy: xykForm1.dy,
+        fee: xykForm1.fee,
+        quote: String(xykForm1.mindy)
+      };
+      
+      const response = await xykSerialize(params);
+      const currentTime = new Date().toLocaleTimeString('zh-CN');
+      const successMessage = `${currentTime} - xykserialize提交成功`;
+      setOrderPressingLog(prev => [successMessage, ...prev].slice(0, 10));
+      message.success('自动提交xykserialize成功');
+      
+      return response;
+    } catch (error: any) {
+      const currentTime = new Date().toLocaleTimeString('zh-CN');
+      const errorMessage = `${currentTime} - xykserialize提交失败: ${error.message || '未知错误'}`;
+      setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+      message.error('自动提交xykserialize失败: ' + (error.message || '未知错误'));
+    }
+  };
 
   // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
   // useEffect(() => {
@@ -756,6 +836,57 @@ const AlexSwap: React.FC = () => {
         pagination={false}
         bordered
       />
+
+      {/* 压单功能控制面板 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>STX/AEUSDC 压单功能</div>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Switch 
+              checked={orderPressingEnabled}
+              onChange={(checked) => {
+                setOrderPressingEnabled(checked);
+                if (checked && !monitorAddress) {
+                  message.warning('请先输入要监控的地址');
+                }
+              }}
+              checkedChildren="压单开启"
+              unCheckedChildren="压单关闭"
+            />
+            <Input
+              placeholder="输入要监控的Stacks地址"
+              value={monitorAddress}
+              onChange={(e) => setMonitorAddress(e.target.value)}
+              style={{ width: '400px' }}
+            />
+            <Tag color={pendingTxDetected ? 'red' : 'green'}>
+              {pendingTxDetected ? 'Pending交易检测中' : '无Pending交易'}
+            </Tag>
+            {lastCheckedTime && (
+              <span style={{ fontSize: '12px', color: '#666' }}>
+                最后检查: {lastCheckedTime}
+              </span>
+            )}
+          </div>
+          
+          {orderPressingLog.length > 0 && (
+            <Card size="small" title="监控日志" style={{ marginTop: '10px' }}>
+              <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {orderPressingLog.map((log, index) => (
+                  <div key={index} style={{ padding: '4px 0', fontSize: '12px', color: log.includes('错误') || log.includes('失败') ? '#ff4d4f' : '#666' }}>
+                    {log}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+          
+          <div style={{ fontSize: '12px', color: '#999', marginTop: '10px' }}>
+            说明：开启压单功能后，系统将每2秒检查一次指定地址的pending交易状态。
+            一旦检测到pending交易，将自动提交xykserialize交易。
+          </div>
+        </Space>
+      </Card>
 
       {/* 交易表格 */}
       <Card style={{ marginTop: '20px' }}>
