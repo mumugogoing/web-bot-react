@@ -35,6 +35,13 @@ const SbtcMakerGun: React.FC = () => {
   const { status, loading, error, start, stop, refresh } = useSbtcMakerGun();
   const [form] = Form.useForm();
   const [orderLoading, setOrderLoading] = useState(false);
+  
+  // Order pressing state
+  const [pressingEnabled, setPressingEnabled] = useState(false);
+  const [pressingInterval, setPressingInterval] = useState(500); // milliseconds
+  const [pressingAmount, setPressingAmount] = useState(0.01);
+  const [pressingPosition, setPressingPosition] = useState(0);
+  const pressingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Default configuration
   const defaultConfig: SbtcMakerGunConfig = {
@@ -81,6 +88,69 @@ const SbtcMakerGun: React.FC = () => {
       setOrderLoading(false);
     }
   };
+
+  // Handle order pressing submission
+  const handlePressingOrder = async () => {
+    try {
+      const response = await submitSbtcStxOrder({ 
+        amount: pressingAmount, 
+        position: pressingPosition 
+      }) as any as ApiResponse;
+      
+      if (response.code === 201) {
+        message.success(`Order pressed successfully (${pressingPosition === 0 ? 'Sell SBTC' : 'Buy SBTC'})`);
+        // Auto-disable after successful submission to prevent mass trading attacks
+        stopOrderPressing();
+        message.info('Order pressing auto-disabled for security. Please enable manually for next use.');
+      } else {
+        message.error(response.msg || 'Failed to press order');
+        stopOrderPressing();
+      }
+    } catch (err: any) {
+      message.error(err.message || 'Failed to press order');
+      stopOrderPressing();
+    }
+  };
+
+  // Start order pressing
+  const startOrderPressing = () => {
+    if (!pressingAmount || pressingAmount <= 0) {
+      message.warning('Please enter a valid amount for order pressing');
+      return;
+    }
+
+    if (pressingInterval < 100) {
+      message.warning('Minimum interval is 100ms to prevent excessive network load');
+      return;
+    }
+
+    setPressingEnabled(true);
+    message.success(`Order pressing started with ${pressingInterval}ms interval`);
+    
+    // Execute first order immediately
+    handlePressingOrder();
+    
+    // Set up interval for subsequent orders
+    pressingIntervalRef.current = setInterval(() => {
+      handlePressingOrder();
+    }, pressingInterval);
+  };
+
+  // Stop order pressing
+  const stopOrderPressing = () => {
+    if (pressingIntervalRef.current) {
+      clearInterval(pressingIntervalRef.current);
+      pressingIntervalRef.current = null;
+    }
+    setPressingEnabled(false);
+  };
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      stopOrderPressing();
+    };
+  }, []);
 
   return (
     <div style={{ padding: '20px' }}>
@@ -363,6 +433,105 @@ const SbtcMakerGun: React.FC = () => {
                 Buy SBTC (Position 1)
               </Button>
             </Space>
+          </Space>
+        </Card>
+
+        {/* Order Pressing Panel */}
+        <Card 
+          type="inner" 
+          title={
+            <Space>
+              <span>Rapid Order Pressing (压单)</span>
+              {pressingEnabled && <Tag color="red">ACTIVE</Tag>}
+            </Space>
+          } 
+          style={{ marginTop: 16 }}
+        >
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Alert
+              message="⚠️ Security Notice"
+              description="Order pressing will auto-disable after ONE successful submission to prevent mass trading attacks. You must manually enable it again for the next use. Use with caution due to network and RPC load."
+              type="warning"
+              showIcon
+            />
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: 16 }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 8 }}>Amount:</label>
+                <InputNumber
+                  value={pressingAmount}
+                  onChange={(value) => setPressingAmount(value || 0.01)}
+                  min={0.001}
+                  step={0.01}
+                  style={{ width: '100%' }}
+                  disabled={pressingEnabled}
+                />
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: 8 }}>Interval (milliseconds):</label>
+                <Select
+                  value={pressingInterval}
+                  onChange={setPressingInterval}
+                  style={{ width: '100%' }}
+                  disabled={pressingEnabled}
+                >
+                  <Option value={100}>100ms (Very Fast - High Load)</Option>
+                  <Option value={200}>200ms (Fast - Medium Load)</Option>
+                  <Option value={500}>500ms (Moderate)</Option>
+                  <Option value={1000}>1000ms (1 second)</Option>
+                  <Option value={2000}>2000ms (2 seconds)</Option>
+                </Select>
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: 8 }}>Position:</label>
+                <Select
+                  value={pressingPosition}
+                  onChange={setPressingPosition}
+                  style={{ width: '100%' }}
+                  disabled={pressingEnabled}
+                >
+                  <Option value={0}>Position 0 (Sell SBTC)</Option>
+                  <Option value={1}>Position 1 (Buy SBTC)</Option>
+                </Select>
+              </div>
+            </div>
+
+            <Divider />
+
+            <Space>
+              {!pressingEnabled ? (
+                <Button
+                  type="primary"
+                  danger
+                  onClick={startOrderPressing}
+                  icon={<PlayCircleOutlined />}
+                  size="large"
+                >
+                  Start Order Pressing
+                </Button>
+              ) : (
+                <Button
+                  danger
+                  onClick={stopOrderPressing}
+                  icon={<PauseCircleOutlined />}
+                  size="large"
+                >
+                  Stop Order Pressing
+                </Button>
+              )}
+            </Space>
+            
+            {pressingEnabled && (
+              <Alert
+                message="Order Pressing Active"
+                description={`Submitting ${pressingPosition === 0 ? 'SELL' : 'BUY'} orders every ${pressingInterval}ms. Will auto-disable after first successful submission.`}
+                type="error"
+                showIcon
+                style={{ marginTop: 8 }}
+              />
+            )}
           </Space>
         </Card>
 
