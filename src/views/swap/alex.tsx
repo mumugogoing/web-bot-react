@@ -9,7 +9,8 @@ import {
   Switch, 
   message, 
   Space,
-  Tag
+  Tag,
+  AutoComplete
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -18,6 +19,7 @@ import {
   xykAutoBuy,
   xykfetchdy,
   xykfetchdx,
+  xykTxSerialization,
   createCexOrder,
   checkTxStatusApi
 } from '@/api/dex/alex';
@@ -32,6 +34,7 @@ interface DataType {
   profit: number;
   txId: string;
   txStatus: string;
+  serialization?: string; // 添加序列化交易数据字段
 }
 
 interface SumTableData {
@@ -62,10 +65,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc',
     su: 'sell',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   const [xykForm2, setXykForm2] = useState<DataType>({
@@ -74,10 +78,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc',
     su: 'buy',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   // DOG/SBTC 交易对
@@ -87,10 +92,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',  // SBTC合约地址
     su: 'sell',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   const [dogSbtcForm2, setDogSbtcForm2] = useState<DataType>({
@@ -99,10 +105,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token',
     su: 'buy',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   // ALEX/STX 交易对
@@ -112,10 +119,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
     su: 'sell',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   const [alexStxForm2, setAlexStxForm2] = useState<DataType>({
@@ -124,10 +132,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
     su: 'buy',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   // ABTC/SUSDT 交易对
@@ -137,10 +146,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-susdt',  // SUSDT合约地址
     su: 'sell',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   const [abtcSusdtForm2, setAbtcSusdtForm2] = useState<DataType>({
@@ -149,10 +159,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-susdt',
     su: 'buy',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   // AEUSDC/USDA 交易对
@@ -162,10 +173,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',  // USDA合约地址
     su: 'sell',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   const [aeusdcUsdaForm2, setAeusdcUsdaForm2] = useState<DataType>({
@@ -174,10 +186,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-token',
     su: 'buy',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   // USDA/STX 交易对
@@ -187,10 +200,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
     su: 'sell',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   const [usdaStxForm2, setUsdaStxForm2] = useState<DataType>({
@@ -199,10 +213,11 @@ const AlexSwap: React.FC = () => {
     dy: 'SM1793C4R5PZ4NS4VQ4WMP7SKKYVH8JZEWSZ9HCCR.token-stx-v-1-2',
     su: 'buy',
     fee: '0.1211',
-    mindy: '0',
+    mindy: '1', // 将默认值改为1
     profit: 1,
     txId: '',
-    txStatus: ''
+    txStatus: '',
+    serialization: ''
   });
 
   // 转账表单
@@ -310,10 +325,11 @@ const AlexSwap: React.FC = () => {
     };
   }, [autoRefresh]);
 
-  // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
-  // useEffect(() => {
-  //   fetchSumData();
-  // }, []);
+  // 组件挂载时获取初始数据
+  useEffect(() => {
+    // 页面加载时立即刷新一次余额
+    fetchSumData();
+  }, []);
 
   // 获取dy值
   const handleGetDy = async (row: DataType, setRow: React.Dispatch<React.SetStateAction<DataType>>) => {
@@ -380,6 +396,145 @@ const AlexSwap: React.FC = () => {
     } catch (error: any) {
       message.error(`获取dx失败: ${error.message || '未知错误'}`);
       console.error('获取dx错误:', error);
+    }
+  };
+
+  // 获取交易序列化
+  const handleXykSerialization = async (row: DataType, setRow: React.Dispatch<React.SetStateAction<DataType>>, type: string) => {
+    try {
+      // 先获取dy值
+      await handleGetDy(row, setRow);
+      
+      // 然后提交数据到后端接口，使用选择的钱包编号
+      const response: any = await xykTxSerialization({
+        account_number: selectedWallet, // 使用选择的钱包而不是固定为1
+        amount: String(row.amount),
+        dx: row.dx,
+        dy: row.dy,
+        su: type,
+        quote: row.mindy,
+        fee: row.fee,
+        contract_name: "xyk-core-v-1-2"
+      });
+
+      if (response && response.data) {
+        // 存储序列化交易数据
+        setRow(prev => ({ 
+          ...prev, 
+          serialization: response.data.serialization,
+          txId: response.data.txid
+        }));
+        message.success('交易序列化成功');
+        console.log('交易序列化数据:', response.data);
+        return;
+      }
+
+      throw new Error('返回数据格式错误');
+    } catch (error: any) {
+      message.error(`交易序列化失败: ${error.message || '未知错误'}`);
+      console.error('交易序列化错误:', error);
+    }
+  };
+
+  // 前端版本的BroadcastTransaction函数
+  const broadcastTransaction = async (serializedTx: string): Promise<{ success: boolean; txId?: string; error?: string }> => {
+    const apiURLs = [
+      "https://stacks-node-api.mainnet.stacks.co/v2/transactions",
+      "https://api.hiro.so/v2/transactions",
+    ];
+
+    try {
+      // 验证序列化交易数据是否为空
+      if (!serializedTx || serializedTx.length === 0) {
+        return { success: false, error: '序列化交易数据为空' };
+      }
+
+      // 验证是否为有效的十六进制字符串
+      if (!/^[0-9a-fA-F]+$/.test(serializedTx)) {
+        return { success: false, error: '序列化交易数据不是有效的十六进制字符串' };
+      }
+
+      // 将十六进制字符串转换为字节数组
+      const txBytes = new Uint8Array(serializedTx.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+
+      // 验证字节数组是否为空
+      if (txBytes.length === 0) {
+        return { success: false, error: '转换后的字节数组为空' };
+      }
+
+      console.log('正在广播的交易数据:', serializedTx);
+      console.log('交易数据长度:', serializedTx.length);
+
+      // 创建Promise数组，同时向所有API节点广播
+      const broadcastPromises = apiURLs.map(async (apiURL) => {
+        try {
+          const response = await fetch(apiURL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+            },
+            body: txBytes,
+          });
+
+          if (response.ok) {
+            const responseBody = await response.text();
+            console.log(`交易成功广播到 ${apiURL}:`, responseBody);
+            return { success: true, txId: responseBody };
+          } else {
+            const errorBody = await response.text();
+            console.error(`广播到 ${apiURL} 失败:`, response.status, errorBody);
+            return { success: false, error: `广播到 ${apiURL} 失败: ${response.status} ${errorBody}` };
+          }
+        } catch (error: any) {
+          console.error(`广播到 ${apiURL} 出错:`, error);
+          return { success: false, error: `广播到 ${apiURL} 出错: ${error.message || error}` };
+        }
+      });
+
+      // 等待所有广播尝试完成
+      const results = await Promise.all(broadcastPromises);
+      
+      // 检查是否有任何一个成功
+      for (const result of results) {
+        if (result.success) {
+          return result;
+        }
+      }
+
+      // 如果都没有成功，返回第一个错误
+      return { success: false, error: '所有API节点广播都失败了: ' + results.map(r => r.error).join(', ') };
+    } catch (error: any) {
+      console.error('广播交易时发生未预期的错误:', error);
+      return { success: false, error: `广播交易时发生未预期的错误: ${error.message || error}` };
+    }
+  };
+
+  // 直接广播已序列化的交易
+  const handleXykExcute = async (row: DataType, setRow: React.Dispatch<React.SetStateAction<DataType>>) => {
+    try {
+      // 检查是否存在已序列化的交易数据
+      if (!row.serialization || row.serialization === '') {
+        message.error('没有找到已序列化的交易数据，请先点击xykserialize按钮');
+        return;
+      }
+      
+      // 显示序列化数据长度供调试
+      console.log('序列化交易数据长度:', row.serialization.length);
+      console.log('序列化交易数据:', row.serialization);
+      
+      // 直接广播已序列化的交易
+      const broadcastResult = await broadcastTransaction(row.serialization);
+      
+      if (broadcastResult.success) {
+        message.success('交易广播成功');
+        setRow(prev => ({ ...prev, txId: broadcastResult.txId, txStatus: 'submitted' }));
+      } else {
+        throw new Error(broadcastResult.error || '交易广播失败');
+      }
+    } catch (error: any) {
+      message.error(`交易广播失败: ${error.message || '未知错误'}`);
+      console.error('交易广播错误:', error);
+      setRow(prev => ({ ...prev, txStatus: 'failed' }));
     }
   };
 
@@ -626,6 +781,7 @@ const AlexSwap: React.FC = () => {
       render: (_text: any, record: DataType, index: number) => (
         <Button 
           type="link"
+          size="small"
           onClick={() => {
             if (index === 0) {
               checkTxStatus(form1, setForm1);
@@ -644,6 +800,7 @@ const AlexSwap: React.FC = () => {
       render: (_text: any, _record: DataType, index: number) => (
         <Button
           type="primary"
+          size="small"
           onClick={() => {
             if (index === 0) {
               handleGetDy(form1, setForm1);
@@ -657,11 +814,48 @@ const AlexSwap: React.FC = () => {
       )
     },
     {
+      title: 'xykserialize',
+      key: 'xykserialize',
+      render: (_text: any, record: DataType, index: number) => (
+        <>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => {
+              if (index === 0) {
+                handleXykSerialization(form1, setXykForm1, 'sell');
+              } else {
+                handleXykSerialization(form2, setXykForm2, 'buy');
+              }
+            }}
+            style={{ marginRight: 8 }}
+          >
+            xykserialize
+          </Button>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => {
+              if (index === 0) {
+                handleXykExcute(form1, setXykForm1);
+              } else {
+                handleXykExcute(form2, setXykForm2);
+              }
+            }}
+            disabled={!record.serialization}
+          >
+            excite
+          </Button>
+        </>
+      )
+    },
+    {
       title: '操作',
       key: 'action',
       render: (_text: any, _record: DataType, index: number) => (
         <Button
           type="primary"
+          size="small"
           onClick={() => {
             if (index === 0) {
               confirmAndTrade(form1, 'sell', setForm1);
@@ -698,6 +892,7 @@ const AlexSwap: React.FC = () => {
       render: (_text: any, _record: DataType, index: number) => (
         <Button
           type="primary"
+          size="small"
           onClick={() => {
             if (index === 0) {
               handleCreateCexOrder(form1, 0);
@@ -717,8 +912,16 @@ const AlexSwap: React.FC = () => {
     }
   ];
 
-  // 交易表格列定义 - STX/AEUSDC
-  const tradeColumns: ColumnsType<DataType> = createTradeColumns(xykForm1, setXykForm1, xykForm2, setXykForm2, 'STX/AEUSDC');
+  // 钱包选项
+  const walletOptions = [
+    { label: 'Z7F7', value: 1 },
+    { label: 'GW55', value: 2 },
+    { label: 'XH53', value: 3 },
+    { label: 'TQSVP', value: 4 }
+  ];
+
+  // 当前选中的钱包
+  const [selectedWallet, setSelectedWallet] = useState(1);
 
   return (
     <div className="app-container" style={{ padding: '20px' }}>
@@ -759,13 +962,310 @@ const AlexSwap: React.FC = () => {
 
       {/* 交易表格 */}
       <Card style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>STX / AEUSDC</div>
-        <Table
-          dataSource={[xykForm1, xykForm2]}
-          columns={tradeColumns}
-          pagination={false}
-          bordered
-        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <div style={{ fontWeight: 'bold' }}>STX/AEUSDC</div>
+          <div>
+            <span style={{ marginRight: '8px' }}>钱包选择:</span>
+            <Select
+              value={selectedWallet}
+              onChange={setSelectedWallet}
+              style={{ width: 120 }}
+              options={walletOptions}
+            />
+          </div>
+        </div>
+        {/* 表格标题行 */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ background: '#fafafa' }}>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>金额</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>最小获取</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>费率</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>方向</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>tx状态</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>刷新X/Y</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>xykserialize</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>操作</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>利润</th>
+                <th style={{ padding: '8px', border: '1px solid #f0f0f0', textAlign: 'center' }}>CEX挂单</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Sell 行 */}
+              <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm1.amount)}
+                      onChange={(value) => setXykForm1(prev => ({ ...prev, amount: value }))}
+                      placeholder="金额"
+                      options={[
+                        { value: '1000' },
+                        { value: '2000' },
+                        { value: '3000' },
+                        { value: '5000' },
+                        { value: '10000' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm1.mindy)}
+                      onChange={(value) => setXykForm1(prev => ({ ...prev, mindy: value }))}
+                      placeholder="最小获取"
+                      options={[
+                        { value: '1' },
+                        { value: '0.5' },
+                        { value: '0.1' },
+                        { value: '0.01' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm1.fee)}
+                      onChange={(value) => setXykForm1(prev => ({ ...prev, fee: value }))}
+                      placeholder="费率"
+                      options={[
+                        { value: '0.0121' },
+                        { value: '0.06' },
+                        { value: '0.121' },
+                        { value: '0.341' },
+                        { value: '0.412' },
+                        { value: '0.581' },
+                        { value: '1.1' },
+                        { value: '1.21' },
+                        { value: '3.1' },
+                        { value: '5.1' },
+                        { value: '12.1' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Tag color="green">sell</Tag>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button 
+                    type="link"
+                    size="small"
+                    onClick={() => checkTxStatus(xykForm1, setXykForm1)}
+                  >
+                    {xykForm1.txStatus || 'N/A'}
+                  </Button>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => handleGetDy(xykForm1, setXykForm1)}
+                  >
+                    获取dy
+                  </Button>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div>
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => handleXykSerialization(xykForm1, setXykForm1, 'sell')}
+                      style={{ marginRight: 4 }}
+                    >
+                      序列化
+                    </Button>
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => handleXykExcute(xykForm1, setXykForm1)}
+                      disabled={!xykForm1.serialization}
+                    >
+                      提交
+                    </Button>
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => confirmAndTrade(xykForm1, 'sell', setXykForm1)}
+                  >
+                    STX=&gt;AE
+                  </Button>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm1.profit)}
+                      onChange={(value) => setXykForm1(prev => ({ ...prev, profit: Number(value) }))}
+                      placeholder="利润"
+                      options={[
+                        { value: '1' },
+                        { value: '1.5' },
+                        { value: '2' },
+                        { value: '2.5' },
+                        { value: '3' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => handleCreateCexOrder(xykForm1, 0)}
+                  >
+                    DC=&gt;STX
+                  </Button>
+                </td>
+              </tr>
+              
+              {/* Buy 行 */}
+              <tr>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm2.amount)}
+                      onChange={(value) => setXykForm2(prev => ({ ...prev, amount: value }))}
+                      placeholder="金额"
+                      options={[
+                        { value: '1000' },
+                        { value: '2000' },
+                        { value: '3000' },
+                        { value: '5000' },
+                        { value: '10000' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm2.mindy)}
+                      onChange={(value) => setXykForm2(prev => ({ ...prev, mindy: value }))}
+                      placeholder="最小获取"
+                      options={[
+                        { value: '1' },
+                        { value: '0.5' },
+                        { value: '0.1' },
+                        { value: '0.01' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm2.fee)}
+                      onChange={(value) => setXykForm2(prev => ({ ...prev, fee: value }))}
+                      placeholder="费率"
+                      options={[
+                        { value: '0.0121' },
+                        { value: '0.06' },
+                        { value: '0.121' },
+                        { value: '0.341' },
+                        { value: '0.412' },
+                        { value: '0.581' },
+                        { value: '1.1' },
+                        { value: '1.21' },
+                        { value: '3.1' },
+                        { value: '5.1' },
+                        { value: '12.1' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Tag color="orange">buy</Tag>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button 
+                    type="link"
+                    size="small"
+                    onClick={() => checkTxStatus(xykForm2, setXykForm2)}
+                  >
+                    {xykForm2.txStatus || 'N/A'}
+                  </Button>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => handleGetDx(xykForm2, setXykForm2)}
+                  >
+                    获取dx
+                  </Button>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div>
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => handleXykSerialization(xykForm2, setXykForm2, 'buy')}
+                      style={{ marginRight: 4 }}
+                    >
+                      序列化
+                    </Button>
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => handleXykExcute(xykForm2, setXykForm2)}
+                      disabled={!xykForm2.serialization}
+                    >
+                      提交
+                    </Button>
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => confirmAndTrade(xykForm2, 'buy', setXykForm2)}
+                  >
+                    AE=&gt;STX
+                  </Button>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '100px' }}>
+                    <AutoComplete
+                      value={String(xykForm2.profit)}
+                      onChange={(value) => setXykForm2(prev => ({ ...prev, profit: Number(value) }))}
+                      placeholder="利润"
+                      options={[
+                        { value: '1' },
+                        { value: '1.5' },
+                        { value: '2' },
+                        { value: '2.5' },
+                        { value: '3' }
+                      ]}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </td>
+                <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => handleCreateCexOrder(xykForm2, 1)}
+                  >
+                    STX=&gt;DC
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       {/* DOG/SBTC 交易对 */}

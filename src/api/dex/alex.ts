@@ -49,6 +49,13 @@ export const xykfetchdy = (data: any) =>
     data
   });
 
+export const xykTxSerialization = (data: any) =>
+  request({
+    url: '/dex/getxyktxserialization',
+    method: 'post',
+    data
+  });
+
 export const createCexOrder = (data: any) =>
   request({
     url: '/dex/createcexorder',
