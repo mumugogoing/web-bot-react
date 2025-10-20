@@ -21,7 +21,9 @@ import {
   xykfetchdx,
   xykTxSerialization,
   createCexOrder,
-  checkTxStatusApi
+  checkTxStatusApi,
+  xykSerialize,
+  checkAddressPendingTx
 } from '@/api/dex/alex';
 
 interface DataType {
@@ -58,6 +60,14 @@ const AlexSwap: React.FC = () => {
   // @ts-ignore - Unused state variable
   const [balanceData, setBalanceData] = useState<any>(null);
   
+  // 压单功能状态
+  const [orderPressingEnabled, setOrderPressingEnabled] = useState(false);
+  const [monitorAddress, setMonitorAddress] = useState('');
+  const [pendingTxDetected, setPendingTxDetected] = useState(false);
+  const [lastCheckedTime, setLastCheckedTime] = useState('');
+  const [orderPressingLog, setOrderPressingLog] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 防止重复提交
+
   // 交易表单数据
   const [xykForm1, setXykForm1] = useState<DataType>({
     amount: 3000,
@@ -325,9 +335,125 @@ const AlexSwap: React.FC = () => {
     };
   }, [autoRefresh]);
 
-  // 组件挂载时获取初始数据
+  // 监控pending交易并自动提交
   useEffect(() => {
-    // 页面加载时立即刷新一次余额
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (orderPressingEnabled && monitorAddress) {
+      const checkPendingTx = async () => {
+        try {
+          const currentTime = new Date().toLocaleTimeString('zh-CN');
+          setLastCheckedTime(currentTime);
+
+          const response: any = await checkAddressPendingTx(monitorAddress);
+
+          if (response?.data?.hasPending) {
+            setPendingTxDetected(true);
+
+            // 防止重复提交 - check isSubmitting directly from state
+            setIsSubmitting(prev => {
+              if (!prev) {
+                const logMessage = `${currentTime} - 检测到pending交易，自动提交xykserialize`;
+                setOrderPressingLog(prevLog => [logMessage, ...prevLog].slice(0, 10));
+
+                // 自动提交xykserialize交易
+                handleAutoSubmitXykSerialize();
+              }
+              return prev;
+            });
+          } else {
+            setPendingTxDetected(false);
+          }
+        } catch (error: any) {
+          const currentTime = new Date().toLocaleTimeString('zh-CN');
+          const errorMessage = `${currentTime} - 监控错误: ${error.message || '未知错误'}`;
+          setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+        }
+      };
+
+      // 立即检查一次
+      checkPendingTx();
+
+      // 每2秒检查一次
+      intervalId = setInterval(() => {
+        checkPendingTx();
+      }, 2000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [orderPressingEnabled, monitorAddress]);
+
+  // 自动提交xykserialize
+  const handleAutoSubmitXykSerialize = async () => {
+    // 防止并发提交
+    if (isSubmitting) {
+      return;
+    }
+
+    // Timeout ID for cleanup
+    let cooldownTimeoutId: NodeJS.Timeout | null = null;
+
+    try {
+      setIsSubmitting(true);
+
+      // 参数验证
+      if (!xykForm1.amount && xykForm1.amount !== 0 || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+        const currentTime = new Date().toLocaleTimeString('zh-CN');
+        const errorMessage = `${currentTime} - 参数验证失败: 交易参数不完整`;
+        setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+        message.error('交易参数不完整，请检查STX/AEUSDC交易表单');
+        return;
+      }
+
+      if (!xykForm1.mindy || xykForm1.mindy === '0') {
+        const currentTime = new Date().toLocaleTimeString('zh-CN');
+        const errorMessage = `${currentTime} - 参数验证失败: 请先获取最小获取数量`;
+        setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+        message.error('请先获取dy值再启用压单功能');
+        return;
+      }
+
+      const params = {
+        amount: String(xykForm1.amount),
+        dx: xykForm1.dx,
+        dy: xykForm1.dy,
+        fee: xykForm1.fee,
+        quote: String(xykForm1.mindy)
+      };
+
+      const response = await xykSerialize(params);
+      const currentTime = new Date().toLocaleTimeString('zh-CN');
+      const successMessage = `${currentTime} - xykserialize提交成功`;
+      setOrderPressingLog(prev => [successMessage, ...prev].slice(0, 10));
+      message.success('自动提交xykserialize成功');
+
+      return response;
+    } catch (error: any) {
+      const currentTime = new Date().toLocaleTimeString('zh-CN');
+      const errorMessage = `${currentTime} - xykserialize提交失败: ${error.message || '未知错误'}`;
+      setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
+      message.error('自动提交xykserialize失败: ' + (error.message || '未知错误'));
+    } finally {
+      // 3秒后允许再次提交，防止过于频繁
+      cooldownTimeoutId = setTimeout(() => {
+        setIsSubmitting(false);
+      }, 3000);
+    }
+
+    // Return cleanup function
+    return () => {
+      if (cooldownTimeoutId) {
+        clearTimeout(cooldownTimeoutId);
+      }
+    };
+  };
+
+  // 组件挂载时获取初始数据 - 已禁用自动加载以防止网络消耗
+  useEffect(() => {
     fetchSumData();
   }, []);
 
@@ -404,7 +530,7 @@ const AlexSwap: React.FC = () => {
     try {
       // 先获取dy值
       await handleGetDy(row, setRow);
-      
+
       // 然后提交数据到后端接口，使用选择的钱包编号
       const response: any = await xykTxSerialization({
         account_number: selectedWallet, // 使用选择的钱包而不是固定为1
@@ -419,8 +545,8 @@ const AlexSwap: React.FC = () => {
 
       if (response && response.data) {
         // 存储序列化交易数据
-        setRow(prev => ({ 
-          ...prev, 
+        setRow(prev => ({
+          ...prev,
           serialization: response.data.serialization,
           txId: response.data.txid
         }));
@@ -493,7 +619,7 @@ const AlexSwap: React.FC = () => {
 
       // 等待所有广播尝试完成
       const results = await Promise.all(broadcastPromises);
-      
+
       // 检查是否有任何一个成功
       for (const result of results) {
         if (result.success) {
@@ -517,14 +643,14 @@ const AlexSwap: React.FC = () => {
         message.error('没有找到已序列化的交易数据，请先点击xykserialize按钮');
         return;
       }
-      
+
       // 显示序列化数据长度供调试
       console.log('序列化交易数据长度:', row.serialization.length);
       console.log('序列化交易数据:', row.serialization);
-      
+
       // 直接广播已序列化的交易
       const broadcastResult = await broadcastTransaction(row.serialization);
-      
+
       if (broadcastResult.success) {
         message.success('交易广播成功');
         setRow(prev => ({ ...prev, txId: broadcastResult.txId, txStatus: 'submitted' }));
@@ -1054,7 +1180,7 @@ const AlexSwap: React.FC = () => {
                   <Tag color="green">sell</Tag>
                 </td>
                 <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
-                  <Button 
+                  <Button
                     type="link"
                     size="small"
                     onClick={() => checkTxStatus(xykForm1, setXykForm1)}
@@ -1127,7 +1253,7 @@ const AlexSwap: React.FC = () => {
                   </Button>
                 </td>
               </tr>
-              
+
               {/* Buy 行 */}
               <tr>
                 <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
@@ -1190,7 +1316,7 @@ const AlexSwap: React.FC = () => {
                   <Tag color="orange">buy</Tag>
                 </td>
                 <td style={{ padding: '8px', border: '1px solid #f0f0f0' }}>
-                  <Button 
+                  <Button
                     type="link"
                     size="small"
                     onClick={() => checkTxStatus(xykForm2, setXykForm2)}

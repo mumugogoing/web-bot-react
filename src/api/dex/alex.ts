@@ -69,3 +69,17 @@ export const checkTxStatusApi = (txid: string) =>
     method: 'get',
     params: { txid }
   });
+
+export const xykSerialize = (data: any) =>
+  request({
+    url: '/dex/xykserialize',
+    method: 'post',
+    data
+  });
+
+export const checkAddressPendingTx = (address: string) =>
+  request({
+    url: '/dex/checkaddresspendingtx',
+    method: 'get',
+    params: { address }
+  });
