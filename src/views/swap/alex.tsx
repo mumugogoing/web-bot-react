@@ -401,7 +401,7 @@ const AlexSwap: React.FC = () => {
       setIsSubmitting(true);
 
       // 参数验证
-      if (!xykForm1.amount && xykForm1.amount !== 0 || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+      if (xykForm1.amount == null || xykForm1.amount === '' || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
         const currentTime = new Date().toLocaleTimeString('zh-CN');
         const errorMessage = `${currentTime} - 参数验证失败: 交易参数不完整`;
         setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
@@ -409,7 +409,7 @@ const AlexSwap: React.FC = () => {
         return;
       }
 
-      if (!xykForm1.mindy || xykForm1.mindy === '0') {
+      if (!xykForm1.mindy || parseFloat(xykForm1.mindy) === 0) {
         const currentTime = new Date().toLocaleTimeString('zh-CN');
         const errorMessage = `${currentTime} - 参数验证失败: 请先获取最小获取数量`;
         setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
@@ -653,7 +653,7 @@ const AlexSwap: React.FC = () => {
 
       if (broadcastResult.success) {
         message.success('交易广播成功');
-        setRow(prev => ({ ...prev, txId: broadcastResult.txId, txStatus: 'submitted' }));
+        setRow(prev => ({ ...prev, txId: broadcastResult.txId || '', txStatus: 'submitted' }));
       } else {
         throw new Error(broadcastResult.error || '交易广播失败');
       }
@@ -1085,6 +1085,93 @@ const AlexSwap: React.FC = () => {
         pagination={false}
         bordered
       />
+
+      {/* STX/AEUSDC 压单功能 */}
+      <Card style={{ marginTop: '20px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>STX/AEUSDC 压单功能</div>
+        
+        {/* 控制行 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          <Switch
+            checked={orderPressingEnabled}
+            onChange={(checked) => {
+              if (checked) {
+                // 启用前验证
+                if (!monitorAddress) {
+                  message.error('请先输入要监控的地址');
+                  return;
+                }
+                if (!xykForm1.mindy || parseFloat(xykForm1.mindy) === 0) {
+                  message.error('请先在STX/AEUSDC表单中获取dy值');
+                  return;
+                }
+                if (xykForm1.amount == null || xykForm1.amount === '' || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+                  message.error('请先在STX/AEUSDC表单中设置完整的交易参数');
+                  return;
+                }
+              }
+              setOrderPressingEnabled(checked);
+            }}
+            checkedChildren="压单开启"
+            unCheckedChildren="压单关闭"
+          />
+          
+          <Input
+            placeholder="输入要监控的Stacks地址"
+            value={monitorAddress}
+            onChange={(e) => setMonitorAddress(e.target.value)}
+            style={{ width: '400px' }}
+          />
+          
+          <Tag color={pendingTxDetected ? 'red' : 'green'}>
+            {pendingTxDetected ? 'Pending交易检测中' : '无Pending交易'}
+          </Tag>
+          
+          {isSubmitting && <Tag color="blue">提交中...</Tag>}
+          
+          {lastCheckedTime && (
+            <span style={{ fontSize: '12px', color: '#666' }}>
+              最后检查: {lastCheckedTime}
+            </span>
+          )}
+        </div>
+
+        {/* 活动日志 */}
+        {orderPressingLog.length > 0 && (
+          <Card 
+            size="small" 
+            title="监控日志" 
+            style={{ marginTop: '10px' }}
+          >
+            <div style={{ maxHeight: '200px', overflow: 'auto' }}>
+              {orderPressingLog.map((log, index) => (
+                <div 
+                  key={index}
+                  style={{ 
+                    padding: '4px 0',
+                    fontSize: '12px',
+                    color: log.includes('错误') || log.includes('失败') ? '#ff4d4f' : '#666'
+                  }}
+                >
+                  {log}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* 说明文本 */}
+        <div style={{ marginTop: '10px', fontSize: '12px' }}>
+          <div style={{ color: '#ff4d4f', marginBottom: '5px' }}>
+            ⚠️ 重要提示：开启前请确保已在下方STX/AEUSDC交易表单中设置好金额、费率并获取dy值
+          </div>
+          <div style={{ color: '#999' }}>
+            说明：开启压单功能后，系统将每2秒检查一次指定地址的pending交易状态。
+            一旦检测到pending交易，将自动使用当前表单参数提交xykserialize交易。
+            为防止重复提交，每次提交后会有3秒冷却时间。
+          </div>
+        </div>
+      </Card>
 
       {/* 交易表格 */}
       <Card style={{ marginTop: '20px' }}>
