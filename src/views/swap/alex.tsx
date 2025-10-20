@@ -401,7 +401,7 @@ const AlexSwap: React.FC = () => {
       setIsSubmitting(true);
 
       // 参数验证
-      if (!xykForm1.amount && xykForm1.amount !== 0 || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+      if (xykForm1.amount == null || xykForm1.amount === '' || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
         const currentTime = new Date().toLocaleTimeString('zh-CN');
         const errorMessage = `${currentTime} - 参数验证失败: 交易参数不完整`;
         setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
@@ -409,7 +409,7 @@ const AlexSwap: React.FC = () => {
         return;
       }
 
-      if (!xykForm1.mindy || xykForm1.mindy === '0') {
+      if (!xykForm1.mindy || parseFloat(xykForm1.mindy) === 0) {
         const currentTime = new Date().toLocaleTimeString('zh-CN');
         const errorMessage = `${currentTime} - 参数验证失败: 请先获取最小获取数量`;
         setOrderPressingLog(prev => [errorMessage, ...prev].slice(0, 10));
@@ -1101,11 +1101,11 @@ const AlexSwap: React.FC = () => {
                   message.error('请先输入要监控的地址');
                   return;
                 }
-                if (!xykForm1.mindy || xykForm1.mindy === '0') {
+                if (!xykForm1.mindy || parseFloat(xykForm1.mindy) === 0) {
                   message.error('请先在STX/AEUSDC表单中获取dy值');
                   return;
                 }
-                if (!xykForm1.amount || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
+                if (xykForm1.amount == null || xykForm1.amount === '' || !xykForm1.dx || !xykForm1.dy || !xykForm1.fee) {
                   message.error('请先在STX/AEUSDC表单中设置完整的交易参数');
                   return;
                 }
