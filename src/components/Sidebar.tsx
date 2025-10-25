@@ -13,7 +13,8 @@ import {
   ApiOutlined,
   FileTextOutlined,
   SettingOutlined,
-  RobotOutlined
+  RobotOutlined,
+  ControlOutlined
 } from '@ant-design/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/auth';
@@ -47,6 +48,12 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       icon: <RobotOutlined />,
       label: 'SBTC MakerGun',
       onClick: () => navigate('/makergun/sbtc'),
+    },
+    {
+      key: '/bot/control',
+      icon: <ControlOutlined />,
+      label: 'Bot Control',
+      onClick: () => navigate('/bot/control'),
     },
     {
       key: '/monitor',
