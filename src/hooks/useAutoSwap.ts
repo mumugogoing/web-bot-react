@@ -106,13 +106,14 @@ export const useAutoSwap = () => {
   // Fetch status
   const fetchStatus = useCallback(async () => {
     try {
-      const response = await getAutoSwapStatus() as any as ApiResponse<AutoSwapStatus>;
+      const response = await getAutoSwapStatus() as unknown as ApiResponse<AutoSwapStatus>;
       if (response.code === 201) {
         setStatus(response.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch status:', err);
-      setError(err.message || 'Failed to fetch status');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch status';
+      setError(errorMsg);
     }
   }, []);
 
@@ -121,7 +122,7 @@ export const useAutoSwap = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await startAutoSwap(config) as any as ApiResponse;
+      const response = await startAutoSwap(config) as unknown as ApiResponse;
       if (response.code === 201) {
         message.success('AutoSwap started successfully');
         addLog('AutoSwap started');
@@ -129,8 +130,8 @@ export const useAutoSwap = () => {
       } else {
         throw new Error(response.msg || 'Failed to start');
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to start AutoSwap';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start AutoSwap';
       setError(errorMsg);
       message.error(errorMsg);
       addLog(`Error: ${errorMsg}`);
@@ -144,7 +145,7 @@ export const useAutoSwap = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await stopAutoSwap() as any as ApiResponse;
+      const response = await stopAutoSwap() as unknown as ApiResponse;
       if (response.code === 201) {
         message.success('AutoSwap stopped successfully');
         addLog('AutoSwap stopped');
@@ -152,8 +153,8 @@ export const useAutoSwap = () => {
       } else {
         throw new Error(response.msg || 'Failed to stop');
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to stop AutoSwap';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to stop AutoSwap';
       setError(errorMsg);
       message.error(errorMsg);
       addLog(`Error: ${errorMsg}`);

@@ -106,13 +106,14 @@ export const useSUSDT = () => {
   // Fetch status
   const fetchStatus = useCallback(async () => {
     try {
-      const response = await getSUSDTStatus() as any as ApiResponse<SUSDTStatus>;
+      const response = await getSUSDTStatus() as unknown as ApiResponse<SUSDTStatus>;
       if (response.code === 201) {
         setStatus(response.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch status:', err);
-      setError(err.message || 'Failed to fetch status');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch status';
+      setError(errorMsg);
     }
   }, []);
 
@@ -121,7 +122,7 @@ export const useSUSDT = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await startSUSDT(config) as any as ApiResponse;
+      const response = await startSUSDT(config) as unknown as ApiResponse;
       if (response.code === 201) {
         message.success('sUSDT test started successfully');
         addLog('sUSDT test started');
@@ -129,8 +130,8 @@ export const useSUSDT = () => {
       } else {
         throw new Error(response.msg || 'Failed to start');
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to start sUSDT test';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start sUSDT test';
       setError(errorMsg);
       message.error(errorMsg);
       addLog(`Error: ${errorMsg}`);
@@ -144,7 +145,7 @@ export const useSUSDT = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await stopSUSDT() as any as ApiResponse;
+      const response = await stopSUSDT() as unknown as ApiResponse;
       if (response.code === 201) {
         message.success('sUSDT test stopped successfully');
         addLog('sUSDT test stopped');
@@ -152,8 +153,8 @@ export const useSUSDT = () => {
       } else {
         throw new Error(response.msg || 'Failed to stop');
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to stop sUSDT test';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to stop sUSDT test';
       setError(errorMsg);
       message.error(errorMsg);
       addLog(`Error: ${errorMsg}`);

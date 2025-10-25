@@ -106,13 +106,14 @@ export const useMakerGun = () => {
   // Fetch status
   const fetchStatus = useCallback(async () => {
     try {
-      const response = await getMakerGunStatus() as any as ApiResponse<MakerGunStatus>;
+      const response = await getMakerGunStatus() as unknown as ApiResponse<MakerGunStatus>;
       if (response.code === 201) {
         setStatus(response.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch status:', err);
-      setError(err.message || 'Failed to fetch status');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch status';
+      setError(errorMsg);
     }
   }, []);
 
@@ -121,7 +122,7 @@ export const useMakerGun = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await startMakerGun(config) as any as ApiResponse;
+      const response = await startMakerGun(config) as unknown as ApiResponse;
       if (response.code === 201) {
         message.success('MakerGun started successfully');
         addLog('MakerGun started');
@@ -129,8 +130,8 @@ export const useMakerGun = () => {
       } else {
         throw new Error(response.msg || 'Failed to start');
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to start MakerGun';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start MakerGun';
       setError(errorMsg);
       message.error(errorMsg);
       addLog(`Error: ${errorMsg}`);
@@ -144,7 +145,7 @@ export const useMakerGun = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await stopMakerGun() as any as ApiResponse;
+      const response = await stopMakerGun() as unknown as ApiResponse;
       if (response.code === 201) {
         message.success('MakerGun stopped successfully');
         addLog('MakerGun stopped');
@@ -152,8 +153,8 @@ export const useMakerGun = () => {
       } else {
         throw new Error(response.msg || 'Failed to stop');
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to stop MakerGun';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to stop MakerGun';
       setError(errorMsg);
       message.error(errorMsg);
       addLog(`Error: ${errorMsg}`);
