@@ -41,6 +41,9 @@
 
 ## 常用地址示例 (Common Address Examples)
 
+以下是 Stacks 主网上常见 DeFi 平台的真实地址，可用于测试和监控：
+(The following are real addresses of common DeFi platforms on Stacks mainnet for testing and monitoring:)
+
 ```
 # ALEX DEX
 SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9

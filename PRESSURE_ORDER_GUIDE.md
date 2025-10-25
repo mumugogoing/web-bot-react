@@ -68,6 +68,10 @@ SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR
 SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9
 ```
 
+注意: 以上是真实的 Stacks 主网地址示例，分别对应 Arkadiko 和 ALEX DEX 平台。请根据您的实际需求添加要监控的地址。
+
+Note: The above are examples of real Stacks mainnet addresses, corresponding to Arkadiko and ALEX DEX platforms respectively. Add the addresses you want to monitor based on your actual needs.
+
 ### 基本配置 (Basic Configuration)
 
 #### 启用自动交易 (Enable Auto Trading)
