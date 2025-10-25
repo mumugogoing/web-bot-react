@@ -36,6 +36,10 @@ const Navigation: React.FC = () => {
       key: '/makergun/sbtc',
     },
     {
+      label: <Link to="/bot/control">Bot Control</Link>,
+      key: '/bot/control',
+    },
+    {
       label: <Link to="/monitor">Starknet监控</Link>,
       key: '/monitor',
     },
