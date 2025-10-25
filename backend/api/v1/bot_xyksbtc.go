@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -207,6 +208,5 @@ func formatFloat(f float64) string {
 
 // floatToString converts float to string with 2 decimals
 func floatToString(f float64) string {
-	// Simple conversion - in production use fmt.Sprintf
-	return string(rune(int(f*100)/100))
+	return fmt.Sprintf("%.2f", f)
 }
