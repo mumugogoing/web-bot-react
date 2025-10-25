@@ -109,6 +109,7 @@ const PressureOrder: React.FC = () => {
         setStatusUpdateInterval(null);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.running]);
 
   // Start monitoring
@@ -204,7 +205,7 @@ const PressureOrder: React.FC = () => {
   };
 
   // Update config
-  const handleConfigChange = (key: keyof PressureOrderConfig, value: any) => {
+  const handleConfigChange = (key: keyof PressureOrderConfig, value: unknown) => {
     setConfig({
       ...config,
       [key]: value,
