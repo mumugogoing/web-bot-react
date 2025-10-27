@@ -43,30 +43,34 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       label: '交易',
       onClick: () => navigate('/swap'),
     },
-    {
-      key: '/makergun/sbtc',
-      icon: <RobotOutlined />,
-      label: 'SBTC MakerGun',
-      onClick: () => navigate('/makergun/sbtc'),
-    },
-    {
-      key: '/bot/control',
-      icon: <ControlOutlined />,
-      label: 'Bot Control',
-      onClick: () => navigate('/bot/control'),
-    },
-    {
-      key: '/monitor',
-      icon: <MonitorOutlined />,
-      label: 'Starknet监控',
-      onClick: () => navigate('/monitor'),
-    },
+    // Show Stacks monitoring for all users
     {
       key: '/stacks',
       icon: <CloudOutlined />,
-      label: 'Stacks监控',
+      label: 'Stacks 监控',
       onClick: () => navigate('/stacks'),
     },
+    // Only show additional menu items if user is ADMIN
+    ...(role === UserRole.ADMIN ? [
+      {
+        key: '/makergun/sbtc',
+        icon: <RobotOutlined />,
+        label: 'SBTC MakerGun',
+        onClick: () => navigate('/makergun/sbtc'),
+      },
+      {
+        key: '/bot/control',
+        icon: <ControlOutlined />,
+        label: 'Bot Control',
+        onClick: () => navigate('/bot/control'),
+      },
+      {
+        key: '/monitor',
+        icon: <MonitorOutlined />,
+        label: 'Starknet监控',
+        onClick: () => navigate('/monitor'),
+      },
+    ] : []),
     // System Management - Only visible to admins
     ...(role === UserRole.ADMIN ? [{
       key: 'system',

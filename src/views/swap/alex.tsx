@@ -1159,18 +1159,6 @@ const AlexSwap: React.FC = () => {
             </div>
           </Card>
         )}
-
-        {/* 说明文本 */}
-        <div style={{ marginTop: '10px', fontSize: '12px' }}>
-          <div style={{ color: '#ff4d4f', marginBottom: '5px' }}>
-            ⚠️ 重要提示：开启前请确保已在下方STX/AEUSDC交易表单中设置好金额、费率并获取dy值
-          </div>
-          <div style={{ color: '#999' }}>
-            说明：开启压单功能后，系统将每2秒检查一次指定地址的pending交易状态。
-            一旦检测到pending交易，将自动使用当前表单参数提交xykserialize交易。
-            为防止重复提交，每次提交后会有3秒冷却时间。
-          </div>
-        </div>
       </Card>
 
       {/* 交易表格 */}

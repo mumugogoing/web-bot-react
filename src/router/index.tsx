@@ -53,7 +53,7 @@ const router = createBrowserRouter([
       {
         path: "stacks",
         element: (
-          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+          <ProtectedRoute requiredRole={UserRole.USER}>
             <StacksMonitor />
           </ProtectedRoute>
         ),
@@ -61,7 +61,7 @@ const router = createBrowserRouter([
       {
         path: "stacks/alex",
         element: (
-          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+          <ProtectedRoute requiredRole={UserRole.USER}>
             <StacksAlex />
           </ProtectedRoute>
         ),
@@ -69,7 +69,7 @@ const router = createBrowserRouter([
       {
         path: "stacks/dex",
         element: (
-          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+          <ProtectedRoute requiredRole={UserRole.USER}>
             <StacksDex />
           </ProtectedRoute>
         ),
