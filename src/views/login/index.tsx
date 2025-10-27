@@ -106,7 +106,7 @@ const Login: React.FC = () => {
           name="login"
           initialValues={{ 
             username: 'stx',
-            password: '123456' 
+            password: 'stx123' 
           }}
           onFinish={handleLogin}
           autoComplete="off"
@@ -178,7 +178,9 @@ const Login: React.FC = () => {
             测试账号：
           </Text>
           <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-            <div>默认账户: stx / 123456</div>
+            <div>默认账户: stx / stx123</div>
+            <div style={{ marginTop: 4 }}>管理员账户: super / root</div>
+            <div style={{ marginTop: 4 }}>管理员账户: admin / root</div>
           </div>
         </div>
       </Card>
