@@ -105,7 +105,7 @@ const Login: React.FC = () => {
           form={form}
           name="login"
           initialValues={{ 
-            username: 'super',
+            username: 'stx',
             password: '123456' 
           }}
           onFinish={handleLogin}
@@ -178,8 +178,7 @@ const Login: React.FC = () => {
             测试账号：
           </Text>
           <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-            <div>超级管理员: super / 123456</div>
-            <div>访客用户: guest / 123456</div>
+            <div>默认账户: stx / 123456</div>
           </div>
         </div>
       </Card>
