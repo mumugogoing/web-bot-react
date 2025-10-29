@@ -77,7 +77,7 @@ const router = createBrowserRouter([
       {
         path: "makergun/sbtc",
         element: (
-          <ProtectedRoute requiredRole={UserRole.USER}>
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <SbtcMakerGun />
           </ProtectedRoute>
         ),
