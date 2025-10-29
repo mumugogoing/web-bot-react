@@ -32,25 +32,28 @@ const Navigation: React.FC = () => {
       key: '/swap',
     },
     {
-      label: <Link to="/makergun/sbtc">SBTC MakerGun</Link>,
-      key: '/makergun/sbtc',
-    },
-    {
-      label: <Link to="/bot/control">Bot Control</Link>,
-      key: '/bot/control',
-    },
-    {
-      label: <Link to="/bot/pressure-order">压单功能</Link>,
-      key: '/bot/pressure-order',
-    },
-    {
-      label: <Link to="/monitor">Starknet监控</Link>,
-      key: '/monitor',
-    },
-    {
       label: <Link to="/stacks">Stacks监控</Link>,
       key: '/stacks',
     },
+    // Admin-only features
+    ...(role === UserRole.ADMIN ? [
+      {
+        label: <Link to="/makergun/sbtc">SBTC MakerGun</Link>,
+        key: '/makergun/sbtc',
+      },
+      {
+        label: <Link to="/bot/control">Bot Control</Link>,
+        key: '/bot/control',
+      },
+      {
+        label: <Link to="/bot/pressure-order">压单功能</Link>,
+        key: '/bot/pressure-order',
+      },
+      {
+        label: <Link to="/monitor">Starknet监控</Link>,
+        key: '/monitor',
+      },
+    ] : []),
     // System Management - Only visible to admins
     ...(role === UserRole.ADMIN ? [{
       label: '系统管理',
