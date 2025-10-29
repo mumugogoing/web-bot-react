@@ -12,6 +12,7 @@ import StacksDex from '@/views/stacks/Dex';
 import SbtcMakerGun from '@/views/makergun/SbtcMakerGun';
 import BotControl from '@/views/bot/BotControl';
 import PressureOrder from '@/views/bot/PressureOrder';
+import SniperControl from '@/views/bot/SniperControl';
 import Profile from '@/views/profile';
 import UserManagement from '@/views/system/UserManagement';
 import RoleManagement from '@/views/system/RoleManagement';
@@ -95,6 +96,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole={UserRole.USER}>
             <PressureOrder />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "bot/sniper",
+        element: (
+          <ProtectedRoute requiredRole={UserRole.USER}>
+            <SniperControl />
           </ProtectedRoute>
         ),
       },
