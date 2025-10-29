@@ -14,7 +14,8 @@ import {
   FileTextOutlined,
   SettingOutlined,
   RobotOutlined,
-  ControlOutlined
+  ControlOutlined,
+  AimOutlined
 } from '@ant-design/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/auth';
@@ -38,10 +39,23 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       onClick: () => navigate('/'),
     },
     {
-      key: '/swap',
+      key: 'trading',
       icon: <SwapOutlined />,
       label: '交易',
-      onClick: () => navigate('/swap'),
+      children: [
+        {
+          key: '/swap',
+          icon: <SwapOutlined />,
+          label: 'Alex 交易',
+          onClick: () => navigate('/swap'),
+        },
+        {
+          key: '/bot/sniper',
+          icon: <AimOutlined />,
+          label: '狙击服务',
+          onClick: () => navigate('/bot/sniper'),
+        },
+      ],
     },
     // Show Stacks monitoring for all users
     {
@@ -119,6 +133,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const getOpenKeys = () => {
     if (location.pathname.startsWith('/system/')) {
       return ['system'];
+    }
+    if (location.pathname === '/swap' || location.pathname.startsWith('/bot/sniper')) {
+      return ['trading'];
     }
     return [];
   };
