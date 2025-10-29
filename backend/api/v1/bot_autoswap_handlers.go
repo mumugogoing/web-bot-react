@@ -234,9 +234,9 @@ func GetCombinedStatus(c *gin.Context) {
 func GetPrices(c *gin.Context) {
 	prices := PriceData{
 		Timestamp:   time.Now(),
-		AeUSDCPrice: 1.0,  // Simulated USDC price
+		AeUSDCPrice: 1.0,     // Simulated USDC price
 		SBTCPrice:   95000.0, // Simulated BTC price
-		STXPrice:    2.5,  // Simulated STX price
+		STXPrice:    2.5,     // Simulated STX price
 		Pools: map[string]float64{
 			"aeusdc_stx": 2.5,
 			"sbtc_stx":   38000.0,

@@ -8,16 +8,16 @@ import (
 
 // AeUSDCMonitor manages aeUSDC monitoring with automatic arbitrage trading
 type AeUSDCMonitor struct {
-	mu             sync.RWMutex
-	running        bool
-	justMonitor    bool
-	stopChan       chan struct{}
-	dataChan       chan AeUSDCData
-	xykDiff        float64
-	aeUSDCBalance  float64
-	stxBalance     float64
-	lastTradeTime  *time.Time
-	lastTradeInfo  string
+	mu            sync.RWMutex
+	running       bool
+	justMonitor   bool
+	stopChan      chan struct{}
+	dataChan      chan AeUSDCData
+	xykDiff       float64
+	aeUSDCBalance float64
+	stxBalance    float64
+	lastTradeTime *time.Time
+	lastTradeInfo string
 }
 
 // AeUSDCData represents real-time monitoring data

@@ -26,5 +26,8 @@ func SetupRouter() *gin.Engine {
 	// Register AutoSwap routes
 	InitAutoSwapRouter(r)
 
+	// Register Sniper routes
+	InitSniperRouter(r)
+
 	return r
 }

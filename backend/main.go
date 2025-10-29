@@ -21,6 +21,7 @@ func main() {
 	log.Println("  GET    /api/v1/autoswap/xyksbtc/ws")
 	log.Println("  GET    /api/v1/autoswap/status")
 	log.Println("  GET    /api/v1/autoswap/prices")
+	log.Println("  GET    /api/v1/sniper/broadcasts")
 
 	if err := r.Run(":10000"); err != nil {
 		log.Fatal("Failed to start server: ", err)

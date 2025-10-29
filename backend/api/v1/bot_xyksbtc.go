@@ -22,12 +22,12 @@ type XykSBTCMonitor struct {
 
 // XykSBTCData represents real-time monitoring data
 type XykSBTCData struct {
-	Timestamp     time.Time `json:"timestamp"`
-	PriceDiff     float64   `json:"price_diff"`
-	SbtcPrice     float64   `json:"sbtc_price"`
-	XykPrice      float64   `json:"xyk_price"`
-	LastAlert     string    `json:"last_alert,omitempty"`
-	Running       bool      `json:"running"`
+	Timestamp time.Time `json:"timestamp"`
+	PriceDiff float64   `json:"price_diff"`
+	SbtcPrice float64   `json:"sbtc_price"`
+	XykPrice  float64   `json:"xyk_price"`
+	LastAlert string    `json:"last_alert,omitempty"`
+	Running   bool      `json:"running"`
 }
 
 // XykSBTCConfig represents configuration for starting the monitor
@@ -160,7 +160,7 @@ func (m *XykSBTCMonitor) checkAlertConditions() {
 func (m *XykSBTCMonitor) generateAlert() {
 	now := time.Now()
 	m.lastAlertTime = &now
-	m.lastAlertInfo = "Price diff alert @ " + now.Format("15:04:05") + 
+	m.lastAlertInfo = "Price diff alert @ " + now.Format("15:04:05") +
 		" (diff: " + formatFloat(m.priceDiff) + "%)"
 
 	log.Printf("XykSBTC alert: Price differential %.2f%%", m.priceDiff)
