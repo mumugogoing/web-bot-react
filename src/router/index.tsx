@@ -11,7 +11,6 @@ import StacksAlex from '@/views/stacks/Alex';
 import StacksDex from '@/views/stacks/Dex';
 import SbtcMakerGun from '@/views/makergun/SbtcMakerGun';
 import BotControl from '@/views/bot/BotControl';
-import PressureOrder from '@/views/bot/PressureOrder';
 import Profile from '@/views/profile';
 import UserManagement from '@/views/system/UserManagement';
 import RoleManagement from '@/views/system/RoleManagement';
@@ -87,14 +86,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole={UserRole.USER}>
             <BotControl />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "bot/pressure-order",
-        element: (
-          <ProtectedRoute requiredRole={UserRole.USER}>
-            <PressureOrder />
           </ProtectedRoute>
         ),
       },
