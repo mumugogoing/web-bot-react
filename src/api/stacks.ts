@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-// Stacks 公共API基础URL - 使用 Hiro API (免费)
+// Stacks 公共API基础URL配置
+// 使用 Hiro API (免费且稳定) - https://api.mainnet.hiro.so
+// 
+// 注意: 不使用 QuickNode API 的原因:
+// - QuickNode API 在高负载时会出现 TLS 错误和 429 限流问题
+// - Hiro API 作为官方推荐的公共 API,提供更好的稳定性和可靠性
+// - 避免依赖需要付费或有严格限流的第三方服务
 const STACKS_API_BASE = 'https://api.mainnet.hiro.so';
 
 export interface StacksTransaction {
