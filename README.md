@@ -287,6 +287,8 @@ VITE_BASE_API=http://localhost:8080
 
 数据来源：Hiro API (Stacks 区块链公共 API)，完全免费，无需登录。
 
+**注意**: 系统使用 Hiro API 而非 QuickNode API。详见 [API 配置说明](API_CONFIGURATION.md)。
+
 ## 从 webtool-vue 迁移的功能对比
 
 本项目已实现 webtool-vue 的所有核心系统管理功能：
