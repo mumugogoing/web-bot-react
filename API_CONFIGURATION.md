@@ -34,10 +34,11 @@ QuickNode API 在实际使用中发现以下问题:
 
 3. **需要付费** - 免费层级配额严格，稳定服务需要付费订阅
 
-4. **URL 格式问题** - 某些情况下会出现 URL 解析错误
+4. **URL 格式问题** - 某些情况下会出现 URL 解析错误（缺少 `://` 分隔符）
    ```
    Get "httpnecessary-crimson-sky.stacks-mainnet.quiknode.pro/..."
    ```
+   注: 这是实际错误日志中出现的格式，显示了 QuickNode API 在某些情况下的不稳定性
 
 ### 代码实现位置
 
